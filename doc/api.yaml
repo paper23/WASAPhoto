@@ -1,0 +1,791 @@
+openapi: 3.0.3
+info:
+  title: WASAPhoto
+  description: |
+    Keep in touch with your friends by sharing photos of special moments, thanks to WASAPhoto! You can upload your photos directly from your PC, and they will be visible to everyone following you.
+  version: 1.0.0
+
+components:
+    schemas:
+      User:
+        title: User
+        description: This object represent a single user
+        type: object
+        properties:
+          id:
+            description: the identifier of the user
+            type: integer
+            example: 1
+            readOnly: true
+          username:
+            description: the nickname of the user
+            type: string
+            minLength: 3
+            maxLength: 16
+            example: lorenzo23
+          biography:
+            description: small text describing the user
+            type: string
+            maxLength: 100
+            example: "Hi, I'm 21, I live in Rome"
+          
+      Image:
+        title: Image
+        description: This object represents a single image (photo)
+        type: object
+        properties:
+          id:
+            description: the identifier of the image
+            type: integer
+            example: 1
+            readOnly: true
+          idOwner:
+            description: the identifier of the user who posted the foto
+            type: integer
+            example: 1
+            readOnly: true
+          dateTime:
+            description: the date and the time the photo was posted
+            type: string
+            format: date-time
+            example: "2023-11-03 14:30:00"
+            readOnly: true
+          url:
+            description: the location of the image on the server
+            type: string
+            example: "/img/123.jpg"
+            #readOnly: true
+            
+      Like:
+        title: Like
+        description: This object represents a single like
+        type: object
+        properties:
+          idLike:
+            description: the identifier of the like
+            type: integer
+            example: 1
+            readOnly: true
+          idLiker:
+            description: the identifier of the user who liked the photo
+            type: integer
+            example: 1
+          idImage:
+            description: the identifier of the photo that was liked
+            type: integer
+            example: 1
+      
+      Comment:
+        title: Comment
+        description: This object represents a single comment
+        type: object
+        properties:
+          idComment:
+            description: the identifier of the comment
+            type: integer
+            example: 1
+            readOnly: true
+          idUser:
+            description: the identifier of the user who commented on the photo
+            type: integer
+            example: 1
+          idImage:
+            description: the identifier of the photo that was commented on
+            type: integer
+            example: 1
+            readOnly: true
+          text:
+            description: the text of the comment
+            type: string
+            minLength: 1
+            maxLength: 200
+            example: beautiful picture!
+          
+
+#GLI UTENTI DEVONO ESSERE PER FORZA LOGGATI, GESTIRE GLI ERRORI
+  
+paths:
+  /session:
+    #doLogin
+    post:
+      tags: ["login"]
+      summary: Logs in the user
+      description: |-
+        If the user does not exist, it will be created, and an identifier is returned. If the user exists, the user identifier is returned.
+      operationId: doLogin
+      requestBody:
+        description: User details
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: Maria
+                  pattern: 'ˆ.*?$'
+                  minLength: 3
+                  maxLength: 16
+        required: true
+      responses:
+        '201':
+          description: User log-in action successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  identifier:
+                    # change here if you decide to use an integer
+                    # or any other type of identifier
+                    type: string
+                    example: "abcdef012345"
+
+  /users/{idUser}/images/:
+    #uploadPhoto
+    post:
+      tags: ["image"]
+      operationId: uploadPhoto
+      summary: upload new photo
+      description: |
+        upload a new photo using data provided in the body of the request and the id of the owner of the, return the full image object with the ID, URL and date/time
+      parameters:
+      - name: idUser
+        in: path
+        description: the identifier of the owner of the photo
+        schema:
+          type: integer
+        required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/Image" }
+      responses:
+        "201":
+          description: photo succesfully uploaded
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Image" }
+        "404":
+          description: user not found, photo not uploaded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  idOwner:
+                    type: string
+                  error:
+                    type: string
+                    example: user id not found, photo not uploaded
+  
+  /users/{idUser}/images/{idImage}:
+    #deletePhoto
+    delete:
+      tags: ["image"]
+      operationId: deletePhoto
+      summary: remove an existing photo
+      description: |
+        remove a photo given its id and the id of the owner of the photo
+      parameters:
+      - name: idUser
+        in: path
+        description: the identifier of the owner of the photo 
+        schema:
+          type: integer
+        required: true
+      - name: idImage
+        in: path
+        description: the identifier of the photo to delete
+        schema:
+          type: integer
+        required: true
+      responses:
+        "200":
+          description: photo succesfully deleted
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Image" }
+        "401":
+          description: unauthorized, only the owner can delete a photo, photo not deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: you are not the owner of the photo or you are not logged in, photo not deleted
+        "404":
+          description: photo not found, photo not deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  error:
+                    type: string
+                    example: photo id not found, photo not deleted
+  
+  /users/{idUser}/images/{idImage}/comments/:
+    #commentPhoto
+    post:
+      tags: ["comment"]
+      operationId: commentPhoto
+      summary: comment on an existing photo
+      description: |
+        comment on an existing photo using data provided in the body of request, the id of the owner of the photo and the id of the photo, return the full image object and the comment object
+      parameters:
+      - name: idUser
+        in: path
+        description: the identifier of the owner of the photo
+        schema:
+          type: integer
+        required: true
+      - name: idImage
+        in: path
+        description: the identifier of the photo
+        schema:
+          type: integer
+        required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/Comment" }
+      responses:
+        "201":
+          description: comment successfully uploaded
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Comment" }
+        "404":
+          description: user and/or photo not found, comment not uploaded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  idUser:
+                    type: integer
+                  idImage:
+                    type: integer
+                  error:
+                    type: string
+                    example: user id and/or photo id not found, comment not uploaded
+  
+  /users/{idUser}/images/{idImage}/comments/{idComment}:
+    #uncommentPhoto
+    delete:
+      tags: ["comment"]
+      operationId: uncommentPhoto
+      summary: remove an existing comment
+      description: |
+        remove a comment given its id, the photo id and the owner of the photo id
+      parameters:
+      - name: idUser
+        in: path
+        description: the identifier of the owner of the photo
+        schema:
+          type: integer
+        required: true
+      - name: idImage
+        in: path
+        description: the identifier of the photo
+        schema:
+          type: integer
+        required: true
+      - name: idComment
+        in: path
+        description: the identifier of the comment
+        schema:
+          type: integer
+        required: true
+      responses:
+        "200":
+          description: comment succesfully deleted
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Comment" }
+        "401":
+          description: unauthorized, only the owner can delete a comment, comment not deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: you are not the owner of the comment or you are not logged in, comment not deleted
+        "404":
+          description: comment not found, comment not deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  idComment:
+                    type: integer
+                    example: 1
+                  error:
+                    type: string
+                    example: comment id not found, comment not deleted
+  
+  /users/{idUser}/bans/:
+    #banUser
+    post:
+      tags: ["ban"]
+      operationId: banUser
+      summary: ban an existing user
+      description: |
+        ban an existing (and not banned) user given its id
+      parameters:
+      - name: idUser
+        in: path
+        description: the identifier of the user who is banning the other user
+        schema:
+          type: integer
+        required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                idUserToBan:
+                  type: integer
+                  example: 1
+      responses:
+        "200":
+          description: user banned successfully
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/User" }
+        "400":
+          description: user already banned
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: "#/components/schemas/User" 
+                - type: object
+                  properties:
+                    error:
+                      type: string
+                      example: user already banned, you can't ban a user twice
+        "404":
+          description: user not found, user not banned
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  idUserToBan:
+                    type: integer
+                    example: 1
+                  error:
+                    type: string
+                    example: id of the user to ban not founded, user not banned
+  
+  /users/{idUser}/bans/{idUserBanned}:
+    #unbanUser
+    delete:
+      tags: ["ban"]
+      operationId: unbanUser
+      summary: unban an existing user
+      description: |
+        unban an existing (and already banned) user given its id
+      parameters:
+      - name: idUser
+        in: path
+        description: id of the user who is unbanning the other user
+        schema:
+          type: integer
+          example: 1
+        required: true
+      - name: idUserBanned
+        in: path
+        description: id of the user to unban
+        schema:
+          type: integer
+          example: 1
+        required: true
+      responses:
+        "200":
+          description: user succesfully unbanned
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/User" }
+  
+  /users/{idUser}/images/{idImage}/likes/:
+    #likePhoto
+    post:
+      tags: ["like"]
+      operationId: likePhoto
+      summary: liking an existing photo
+      description: |
+        liking an existing photo using data provided in the body of request and the photo id and the owner of the photo id, return the full image object and the like counter
+      parameters:
+      - name: idUser
+        in: path
+        description: the identifier of the owner of the photo
+        schema:
+          type: integer
+        required: true
+      - name: idImage
+        in: path
+        description: the identifier of the photo
+        schema:
+          type: integer
+        required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/Like" }
+      responses:
+        "201":
+          description: photo succesfully liked
+          content:
+            application/json:
+              schema: 
+                allOf:
+                  - $ref: '#/components/schemas/Like'
+                  - type: object
+                    properties:
+                      likeCounter:
+                        type: integer
+                        example: 150
+        "404":
+          description: user and/or photo not found, photo not liked
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  idUser:
+                    type: string
+                    example: "lorenzo23"
+                  idImage:
+                    type: integer
+                    example: 1
+                  error:
+                    type: string
+                    example: user id and/or photo id not found, photo not liked
+  
+  /users/{idUser}/images/{idImage}/likes/{idLike}:
+    #unlikePhoto
+    delete:
+      tags: ["like"]
+      operationId: unlikePhoto
+      summary: remove an existing like
+      description: |
+        remove a like given its id, the photo id and the owner of the photo id
+      parameters:
+      - name: idUser
+        in: path
+        description: the identifier of the owner of the photo
+        schema:
+          type: integer
+        required: true
+      - name: idImage
+        in: path
+        description: the identifier of the photo
+        schema:
+          type: integer
+        required: true
+      - name: idLike
+        in: path
+        description: the identifier of the like
+        schema:
+          type: integer
+        required: true
+      responses:
+        "200":
+          description: like succesfully deleted
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Like" }
+        "401":
+          description: unauthorized, only the owner can delete a like, like not deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: you are not the owner of the like or you are not logged in, like not deleted
+        "404":
+          description: like not found, like not deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 1
+                  error:
+                    type: string
+                    example: like id not found, like not deleted
+  
+  /users/{idUser}:
+    #getUserProfile
+    get:
+      tags: ["user"]
+      operationId: getUserProfile
+      summary: return the user profile
+      description: |
+        return the user profile given its id, the user profile is composed by the user’s photos (in reverse chronological order), how many photos have been uploaded, and the user’s followers and following
+      parameters:
+        - name: idUser
+          in: path
+          description: identifier of the user
+          required: true
+          schema:
+            type: integer
+            example: 1
+      responses:
+        "200":
+          description: user profile
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: "#/components/schemas/User"
+                - type: object
+                  properties:
+                    followCount:
+                      type: integer
+                      example: 250
+                    followerCount:
+                      type: integer
+                      example: 185
+                - $ref: "#/components/schemas/Image"
+        "401":
+          description: authentication is required
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: authentication is required, please log in into your account
+        "404":
+          description: user not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  idUser:
+                    type: integer
+                    example: 1
+                  error:
+                    type: string
+                    example: id user not found
+    
+    #setMyUsername
+    put:
+      tags: ["user"]
+      operationId: setMyUsername
+      summary: set/update username
+      description: |
+        set/update an existing user's username
+      parameters:
+      - name: idUser
+        in: path
+        schema:
+          type: integer
+          example: 1
+        required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                newUsername:
+                  type: string
+                  example: username2
+      responses:
+        "200":
+          description: username successfully uploaded
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/User" }
+        "404":
+          description: user id not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  idUser:
+                    type: integer
+                    example: 1
+                  error:
+                    type: string
+                    example: user identifier not found, username not uploaded
+        "401":
+          description: authentication is required
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: authentication is required, please log in into your account
+  
+  /users/{idUser}/follows/:
+    #followUser
+    post:
+      tags: ["follow"]
+      operationId: followUser
+      summary: following an existing user
+      description: |
+        following an existing user using data provided in the body of the request and the user id in the path
+      parameters:
+      - name: idUser
+        in: path
+        schema:
+          type: integer
+          example: 1
+        required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                idUserToFollow:
+                  type: integer
+                  example: 1
+      responses:
+        "201":
+          description: user successfully followed
+          content:
+            application/json:
+              schema:
+                allOf:
+                - type: object
+                  properties:
+                    followCounter:
+                      type: integer
+                      example: 250
+                - $ref: "#/components/schemas/User"
+        "404":
+          description: user not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  idUser:
+                    type: integer
+                    example: 1
+                  idUserToFollow:
+                    type: integer
+                    example: 1
+                  error:
+                    type: string
+                    example: user id or userToFollow id not found, user not followed
+  
+  /user/{idUser}/follows/{idUserToUnfollow}:
+    #unfollowUser
+    delete:
+      tags: ["follow"]
+      operationId: unfollowUser
+      summary: unfollow an existing and followed user
+      description: |
+        unfollow an existing and followed user given its id
+      parameters:
+      - name: idUser
+        in: path
+        schema:
+          type: integer
+          example: 1
+        required: true
+      - name: idUserToUnfollow
+        in: path
+        schema:
+          type: integer
+          example: 1
+        required: true
+      responses:
+        "200":
+          description: user succesfully unfollowed
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/User" }
+        "401":
+          description: unauthorized, you can't unfollow an user if you don't follow him first, user not unfollowed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  idUserToUnfollow:
+                    type: integer
+                    example: 1
+                  error:
+                    type: string
+                    example: you can't unfollow an user if you don't follow him first, user not unfollowed
+        "404":
+          description: user not found, user not unfollowed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  idUser:
+                    type: integer
+                    example: 1
+                  idUserToUnfollow:
+                    type: integer
+                    example: 1
+                  error:
+                    type: string
+                    example: user/user to unfollow id not found, user not unfollowed
+
+  /user/{idUser}/stream:
+    #getMyStream
+    get:
+      tags: ["stream"]
+      operationId: getMyStream
+      summary: get images of followed users
+      description: |
+        get images of followed users in chronological order (from the most recent to the oldest)
+      parameters:
+      - name: idUser
+        in: path
+        required: true
+        schema:
+          type: integer
+          example: 1
+      responses:
+        "200":
+          description: my stream (feed)
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Image"
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
