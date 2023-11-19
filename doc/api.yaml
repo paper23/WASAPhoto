@@ -3,16 +3,24 @@ info:
   title: WASAPhoto
   description: |
     Keep in touch with your friends by sharing photos of special moments, thanks to WASAPhoto! You can upload your photos directly from your PC, and they will be visible to everyone following you.
-  version: 1.0.0
+  version: 1.0.1
 
 components:
+
+    securitySchemes:
+        bearerAuth:            # arbitrary name for the security scheme
+          type: http
+          scheme: bearer
+          bearerFormat: JWT    # optional, arbitrary value for documentation purposes
+    
     schemas:
+    
       User:
         title: User
         description: This object represent a single user
         type: object
         properties:
-          id:
+          idUser:
             description: the identifier of the user
             type: integer
             example: 1
@@ -22,11 +30,14 @@ components:
             type: string
             minLength: 3
             maxLength: 16
+            pattern: 'ˆ.+?$'
             example: lorenzo23
           biography:
             description: small text describing the user
             type: string
+            minLength: 1
             maxLength: 100
+            pattern: 'ˆ.*$'
             example: "Hi, I'm 21, I live in Rome"
           
       Image:
@@ -34,7 +45,7 @@ components:
         description: This object represents a single image (photo)
         type: object
         properties:
-          id:
+          idImage:
             description: the identifier of the image
             type: integer
             example: 1
@@ -48,11 +59,16 @@ components:
             description: the date and the time the photo was posted
             type: string
             format: date-time
+            pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z[-+]\d{2}:\d{2}$'
             example: "2023-11-03 14:30:00"
+            minLength: 20
+            maxLength: 29
             readOnly: true
           url:
             description: the location of the image on the server
             type: string
+            minLength: 3
+            maxLength: 100
             example: "/img/123.jpg"
             #readOnly: true
             
@@ -70,7 +86,7 @@ components:
             description: the identifier of the user who liked the photo
             type: integer
             example: 1
-          idImage:
+          idImageLiked:
             description: the identifier of the photo that was liked
             type: integer
             example: 1
@@ -85,11 +101,11 @@ components:
             type: integer
             example: 1
             readOnly: true
-          idUser:
+          idUserWriter:
             description: the identifier of the user who commented on the photo
             type: integer
             example: 1
-          idImage:
+          idImageCommented:
             description: the identifier of the photo that was commented on
             type: integer
             example: 1
@@ -100,7 +116,16 @@ components:
             minLength: 1
             maxLength: 200
             example: beautiful picture!
-          
+
+tags:
+- name: login
+- name: image
+- name: user
+- name: follow
+- name: stream
+- name: comment
+- name: ban
+- name: like
 
 #GLI UTENTI DEVONO ESSERE PER FORZA LOGGATI, GESTIRE GLI ERRORI
   
@@ -108,6 +133,8 @@ paths:
   /session:
     #doLogin
     post:
+      security:
+        - bearerAuth: []
       tags: ["login"]
       summary: Logs in the user
       description: |-
@@ -121,6 +148,7 @@ paths:
               type: object
               properties:
                 name:
+                  description: username
                   type: string
                   example: Maria
                   pattern: 'ˆ.*?$'
@@ -136,14 +164,17 @@ paths:
                 type: object
                 properties:
                   identifier:
+                    description: the identifier of the user (created by the server)
                     # change here if you decide to use an integer
                     # or any other type of identifier
-                    type: string
-                    example: "abcdef012345"
+                    type: integer
+                    example: 1
 
   /users/{idUser}/images/:
     #uploadPhoto
     post:
+      security:
+        - bearerAuth: []
       tags: ["image"]
       operationId: uploadPhoto
       summary: upload new photo
@@ -175,14 +206,18 @@ paths:
                 type: object
                 properties:
                   idOwner:
+                    description: the identifier of the owner of the photo
                     type: string
                   error:
+                    description: error type
                     type: string
                     example: user id not found, photo not uploaded
   
   /users/{idUser}/images/{idImage}:
     #deletePhoto
     delete:
+      security:
+        - bearerAuth: []
       tags: ["image"]
       operationId: deletePhoto
       summary: remove an existing photo
@@ -215,6 +250,7 @@ paths:
                 type: object
                 properties:
                   error:
+                    description: error type
                     type: string
                     example: you are not the owner of the photo or you are not logged in, photo not deleted
         "404":
@@ -224,15 +260,19 @@ paths:
               schema:
                 type: object
                 properties:
-                  id:
+                  idImage:
+                    description: the identifier of the photo to delete
                     type: integer
                   error:
+                    description: error type
                     type: string
                     example: photo id not found, photo not deleted
   
   /users/{idUser}/images/{idImage}/comments/:
     #commentPhoto
     post:
+      security:
+        - bearerAuth: []
       tags: ["comment"]
       operationId: commentPhoto
       summary: comment on an existing photo
@@ -270,16 +310,21 @@ paths:
                 type: object
                 properties:
                   idUser:
+                    description: the identifier of the user
                     type: integer
                   idImage:
+                    description: the identiefier of the photo
                     type: integer
                   error:
+                    description: error type
                     type: string
                     example: user id and/or photo id not found, comment not uploaded
   
   /users/{idUser}/images/{idImage}/comments/{idComment}:
     #uncommentPhoto
     delete:
+      security:
+        - bearerAuth: []
       tags: ["comment"]
       operationId: uncommentPhoto
       summary: remove an existing comment
@@ -318,6 +363,7 @@ paths:
                 type: object
                 properties:
                   error:
+                    description: error type
                     type: string
                     example: you are not the owner of the comment or you are not logged in, comment not deleted
         "404":
@@ -328,15 +374,19 @@ paths:
                 type: object
                 properties:
                   idComment:
+                    description: the identifier of the comment
                     type: integer
                     example: 1
                   error:
+                    description: error type
                     type: string
                     example: comment id not found, comment not deleted
   
   /users/{idUser}/bans/:
     #banUser
     post:
+      security:
+        - bearerAuth: []
       tags: ["ban"]
       operationId: banUser
       summary: ban an existing user
@@ -357,6 +407,7 @@ paths:
               type: object
               properties:
                 idUserToBan:
+                  description: the identifier of the user to ban
                   type: integer
                   example: 1
       responses:
@@ -375,6 +426,7 @@ paths:
                 - type: object
                   properties:
                     error:
+                      description: error type
                       type: string
                       example: user already banned, you can't ban a user twice
         "404":
@@ -385,15 +437,19 @@ paths:
                 type: object
                 properties:
                   idUserToBan:
+                    description: the identifier of the user to ban
                     type: integer
                     example: 1
                   error:
+                    description: error type
                     type: string
                     example: id of the user to ban not founded, user not banned
   
   /users/{idUser}/bans/{idUserBanned}:
     #unbanUser
     delete:
+      security:
+        - bearerAuth: []
       tags: ["ban"]
       operationId: unbanUser
       summary: unban an existing user
@@ -424,6 +480,8 @@ paths:
   /users/{idUser}/images/{idImage}/likes/:
     #likePhoto
     post:
+      security:
+        - bearerAuth: []
       tags: ["like"]
       operationId: likePhoto
       summary: liking an existing photo
@@ -458,6 +516,7 @@ paths:
                   - type: object
                     properties:
                       likeCounter:
+                        description: the counter of the like
                         type: integer
                         example: 150
         "404":
@@ -468,18 +527,22 @@ paths:
                 type: object
                 properties:
                   idUser:
-                    type: string
-                    example: "lorenzo23"
+                    description: the identifier of the user
+                    type: integer
+                    example: 1
                   idImage:
                     type: integer
                     example: 1
                   error:
+                    description: error type
                     type: string
                     example: user id and/or photo id not found, photo not liked
   
   /users/{idUser}/images/{idImage}/likes/{idLike}:
     #unlikePhoto
     delete:
+      security:
+        - bearerAuth: []
       tags: ["like"]
       operationId: unlikePhoto
       summary: remove an existing like
@@ -518,6 +581,7 @@ paths:
                 type: object
                 properties:
                   error:
+                    description: error type
                     type: string
                     example: you are not the owner of the like or you are not logged in, like not deleted
         "404":
@@ -527,16 +591,20 @@ paths:
               schema:
                 type: object
                 properties:
-                  id:
+                  idLike:
+                    description: the identifier of the like to delete
                     type: integer
                     example: 1
                   error:
+                    description: error type
                     type: string
                     example: like id not found, like not deleted
   
   /users/{idUser}:
     #getUserProfile
     get:
+      security:
+        - bearerAuth: []
       tags: ["user"]
       operationId: getUserProfile
       summary: return the user profile
@@ -561,9 +629,11 @@ paths:
                 - type: object
                   properties:
                     followCount:
+                      description: the counter of the user you are following
                       type: integer
                       example: 250
                     followerCount:
+                      description: the counter of the users who follow you
                       type: integer
                       example: 185
                 - $ref: "#/components/schemas/Image"
@@ -575,6 +645,7 @@ paths:
                 type: object
                 properties:
                   error:
+                    description: error type
                     type: string
                     example: authentication is required, please log in into your account
         "404":
@@ -585,16 +656,20 @@ paths:
                 type: object
                 properties:
                   idUser:
+                    description: the identifier of the user
                     type: integer
                     example: 1
                   error:
+                    description: error type
                     type: string
                     example: id user not found
     
-    #setMyUsername
+    #setMyUserName
     put:
+      security:
+        - bearerAuth: []
       tags: ["user"]
-      operationId: setMyUsername
+      operationId: setMyUserName
       summary: set/update username
       description: |
         set/update an existing user's username
@@ -612,6 +687,7 @@ paths:
               type: object
               properties:
                 newUsername:
+                  description: the new username
                   type: string
                   example: username2
       responses:
@@ -628,9 +704,11 @@ paths:
                 type: object
                 properties:
                   idUser:
+                    description: the identifier of the user
                     type: integer
                     example: 1
                   error:
+                    description: error type
                     type: string
                     example: user identifier not found, username not uploaded
         "401":
@@ -641,12 +719,15 @@ paths:
                 type: object
                 properties:
                   error:
+                    description: error type
                     type: string
                     example: authentication is required, please log in into your account
   
   /users/{idUser}/follows/:
     #followUser
     post:
+      security:
+        - bearerAuth: []
       tags: ["follow"]
       operationId: followUser
       summary: following an existing user
@@ -666,10 +747,11 @@ paths:
               type: object
               properties:
                 idUserToFollow:
+                  description: the identifier of the user to follow
                   type: integer
                   example: 1
       responses:
-        "201":
+        "200":
           description: user successfully followed
           content:
             application/json:
@@ -678,6 +760,7 @@ paths:
                 - type: object
                   properties:
                     followCounter:
+                      description: the conter of the user you follow
                       type: integer
                       example: 250
                 - $ref: "#/components/schemas/User"
@@ -689,18 +772,23 @@ paths:
                 type: object
                 properties:
                   idUser:
+                    description: the identifier of the user
                     type: integer
                     example: 1
                   idUserToFollow:
+                    description: the identifier of user to follow
                     type: integer
                     example: 1
                   error:
+                    description: error type
                     type: string
                     example: user id or userToFollow id not found, user not followed
   
   /user/{idUser}/follows/{idUserToUnfollow}:
     #unfollowUser
     delete:
+      security:
+        - bearerAuth: []
       tags: ["follow"]
       operationId: unfollowUser
       summary: unfollow an existing and followed user
@@ -733,9 +821,11 @@ paths:
                 type: object
                 properties:
                   idUserToUnfollow:
+                    description: the identifier of the user to unfollow
                     type: integer
                     example: 1
                   error:
+                    description: error type
                     type: string
                     example: you can't unfollow an user if you don't follow him first, user not unfollowed
         "404":
@@ -746,18 +836,23 @@ paths:
                 type: object
                 properties:
                   idUser:
+                    description: the identifier of the user
                     type: integer
                     example: 1
                   idUserToUnfollow:
+                    description: the identifier of the user to unfollow
                     type: integer
                     example: 1
                   error:
+                    description: error type
                     type: string
                     example: user/user to unfollow id not found, user not unfollowed
 
   /user/{idUser}/stream:
     #getMyStream
     get:
+      security:
+        - bearerAuth: []
       tags: ["stream"]
       operationId: getMyStream
       summary: get images of followed users
