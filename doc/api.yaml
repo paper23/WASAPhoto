@@ -679,17 +679,16 @@ paths:
         schema:
           type: integer
           example: 1
+          pattern: 'ˆ.*?$'
+          minLength: 3
+          maxLength: 16
         required: true
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                newUsername:
-                  description: the new username
-                  type: string
-                  example: username2
+      - name: newUsername
+        in: query
+        schema:
+          type: string
+          example: "paper23"
+        required: true
       responses:
         "200":
           description: username successfully uploaded
