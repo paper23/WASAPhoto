@@ -3,7 +3,7 @@ info:
   title: WASAPhoto
   description: |
     Keep in touch with your friends by sharing photos of special moments, thanks to WASAPhoto! You can upload your photos directly from your PC, and they will be visible to everyone following you.
-  version: 1.0.1
+  version: 1.0.2
 
 components:
 
@@ -60,16 +60,17 @@ components:
             type: string
             format: date-time
             pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z[-+]\d{2}:\d{2}$'
-            example: "2023-11-03 14:30:00"
+            example: "2023-11-25T15:30:00Z+03:00"
             minLength: 20
             maxLength: 29
             readOnly: true
           url:
             description: the location of the image on the server
             type: string
+            pattern: '^/img/[a-z]+[0-9]+$'
             minLength: 3
             maxLength: 100
-            example: "/img/123.jpg"
+            example: "/img/photo123.jpg"
             #readOnly: true
             
       Like:
@@ -113,6 +114,7 @@ components:
           text:
             description: the text of the comment
             type: string
+            pattern: '.+'
             minLength: 1
             maxLength: 200
             example: beautiful picture!
@@ -151,7 +153,7 @@ paths:
                   description: username
                   type: string
                   example: Maria
-                  pattern: 'ˆ.*?$'
+                  pattern: 'ˆ.+?$'
                   minLength: 3
                   maxLength: 16
         required: true
@@ -297,7 +299,7 @@ paths:
           application/json:
             schema: { $ref: "#/components/schemas/Comment" }
       responses:
-        "201":
+        "200":
           description: comment successfully uploaded
           content:
             application/json:
@@ -506,7 +508,7 @@ paths:
           application/json:
             schema: { $ref: "#/components/schemas/Like" }
       responses:
-        "201":
+        "200":
           description: photo succesfully liked
           content:
             application/json:
@@ -531,6 +533,7 @@ paths:
                     type: integer
                     example: 1
                   idImage:
+                    description: the identifier of the image
                     type: integer
                     example: 1
                   error:
@@ -679,16 +682,21 @@ paths:
         schema:
           type: integer
           example: 1
-          pattern: 'ˆ.*?$'
-          minLength: 3
-          maxLength: 16
         required: true
-      - name: newUsername
-        in: query
-        schema:
-          type: string
-          example: "paper23"
+      requestBody:
         required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                newUsername:
+                  description: the new username
+                  type: string
+                  pattern: 'ˆ.+?$'
+                  minLength: 3
+                  maxLength: 16
+                  example: username2
       responses:
         "200":
           description: username successfully uploaded
@@ -740,6 +748,7 @@ paths:
           example: 1
         required: true
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -871,6 +880,8 @@ paths:
             application/json:
               schema:
                 type: array
+                minItems: 0
+                maxItems: 100
                 items:
                   $ref: "#/components/schemas/Image"
 

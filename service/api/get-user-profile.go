@@ -12,6 +12,7 @@ type User struct {
 	idUser    int
 	Username  string
 	Biography string
+	Follow    []Follow
 }
 
 var Users = []User{
@@ -19,6 +20,10 @@ var Users = []User{
 		idUser:    0,
 		Username:  "lorenzo23",
 		Biography: "Hi, I'm 21, I live in Rome",
+		Follow: []Follow{
+			{IdUserFollowed: 1},
+			{IdUserFollowed: 2},
+		},
 	},
 }
 

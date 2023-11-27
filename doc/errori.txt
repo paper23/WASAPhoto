@@ -1,0 +1,2 @@
+   2   (5%) : Properties with the same name have inconsistent types NON SI TROVANO
+  22  (54%) : Schema should have a non-empty description
