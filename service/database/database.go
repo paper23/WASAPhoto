@@ -38,8 +38,10 @@ import (
 
 // AppDatabase is the high level interface for the DB
 type AppDatabase interface {
-	GetName() (string, error)
-	SetName(name string) error
+	DoLogin(username string) error
+	FindUserId(username string) (error, int)
+	CheckUsername(username string) (error, int)
+	SetUsername(id int, username string) error
 
 	Ping() error
 }
@@ -55,14 +57,18 @@ func New(db *sql.DB) (AppDatabase, error) {
 		return nil, errors.New("database is required when building a AppDatabase")
 	}
 
+	_, errPramga := db.Exec(`PRAGMA foreign_keys= ON`)
+	if errPramga != nil {
+		return nil, fmt.Errorf("error setting pragmas: %w", errPramga)
+	}
+
 	// Check if table exists. If not, the database is empty, and we need to create the structure
 	var tableName string
-	err := db.QueryRow(`SELECT name FROM sqlite_master WHERE type='table' AND name='example_table';`).Scan(&tableName)
+	err := db.QueryRow(`SELECT name FROM sqlite_master WHERE type='table' AND name='users';`).Scan(&tableName)
 	if errors.Is(err, sql.ErrNoRows) {
-		sqlStmt := `CREATE TABLE example_table (id INTEGER NOT NULL PRIMARY KEY, name TEXT);`
-		_, err = db.Exec(sqlStmt)
+		err = createDatabase(db)
 		if err != nil {
-			return nil, fmt.Errorf("error creating database structure: %w", err)
+			return nil, fmt.Errorf("error creating database: %w", err)
 		}
 	}
 
@@ -73,4 +79,48 @@ func New(db *sql.DB) (AppDatabase, error) {
 
 func (db *appdbimpl) Ping() error {
 	return db.c.Ping()
+}
+
+func createDatabase(db *sql.DB) error {
+	tables := [4]string{
+		`CREATE TABLE IF NOT EXISTS users (
+			idUser INTEGER PRIMARY KEY AUTOINCREMENT,
+			username VARCHAR(16) NOT NULL,
+			biography VARCHAR(100)
+		);`,
+		`CREATE TABLE IF NOT EXISTS images (
+			idImage INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+			idOwner INTEGER NOT NULL,
+			dateTime DATETIME NOT NULL,
+			url VARCHAR(100) NOT NULL,
+			FOREIGN KEY(idOwner) REFERENCES users (idUser) ON DELETE CASCADE
+		);`,
+		`CREATE TABLE IF NOT EXISTS likes (
+			idLiker INTEGER NOT NULL,
+			idImageLiked INTEGER NOT NULL,
+			PRIMARY KEY (idLiker, idImageLiked),
+			FOREIGN KEY(idLiker) REFERENCES users (idUser) ON DELETE CASCADE,
+			FOREIGN KEY(idImageLiked) REFERENCES images (idImage) ON DELETE CASCADE
+		);`,
+		`CREATE TABLE IF NOT EXISTS comments (
+			idComment INTEGER NOT NULL,
+			idUserWriter INTEGER NOT NULL,
+			idImageCommented INTEGER NOT NULL,
+			text VARCHAR(200) NOT NULL,
+			PRIMARY KEY (idComment, idUserWriter, idImageCommented),
+			FOREIGN KEY(idUserWriter) REFERENCES users (idUser) ON DELETE CASCADE,
+			FOREIGN KEY(idImageCommented) REFERENCES images (idImage) ON DELETE CASCADE
+		);`,
+	}
+
+	for i := 0; i < len(tables); i++ {
+		sqlStmt := tables[i]
+		_, err := db.Exec(sqlStmt)
+
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+
 }
