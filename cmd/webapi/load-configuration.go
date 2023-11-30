@@ -26,8 +26,7 @@ type WebAPIConfiguration struct {
 	}
 	Debug bool
 	DB    struct {
-		//Filename string `conf:"default:/tmp/decaf.db"`
-		Filename string `conf:"default:/Users/lorenzocarta/Desktop/WASAPhoto/service/database/decaf2.db"`
+		Filename string `conf:"default:/tmp/decaf.db"`
 	}
 }
 

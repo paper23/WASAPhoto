@@ -1,13 +1,7 @@
 {
 	"folders": [
 		{
-			"path": "../Wasa_GO/GO/hilo"
-		},
-		{
 			"path": "."
-		},
-		{
-			"path": "../TemplateWASA/WaSa"
 		}
 	],
 	"settings": {}

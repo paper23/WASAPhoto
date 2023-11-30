@@ -38,10 +38,15 @@ import (
 
 // AppDatabase is the high level interface for the DB
 type AppDatabase interface {
+	//user
 	DoLogin(username string) error
 	FindUserId(username string) (error, int)
 	CheckUsername(username string) (error, int)
 	SetUsername(id int, username string) error
+	SelectUser(id int) (error, int, string, string)
+
+	//image
+	InsertPhoto(idOwner int, date string, url string) (error, int64)
 
 	Ping() error
 }
@@ -85,7 +90,7 @@ func createDatabase(db *sql.DB) error {
 	tables := [4]string{
 		`CREATE TABLE IF NOT EXISTS users (
 			idUser INTEGER PRIMARY KEY AUTOINCREMENT,
-			username VARCHAR(16) NOT NULL,
+			username VARCHAR(16) NOT NULL UNIQUE,
 			biography VARCHAR(100)
 		);`,
 		`CREATE TABLE IF NOT EXISTS images (
