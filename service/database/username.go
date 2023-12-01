@@ -1,6 +1,6 @@
 package database
 
-//insert a new user given its username (set biography = "")
+// insert a new user given its username (set biography = "")
 func (db *appdbimpl) DoLogin(username string) error {
 	_, err := db.c.Exec(`INSERT INTO users (username, biography) VALUES (?, "")`, username)
 
@@ -11,7 +11,7 @@ func (db *appdbimpl) DoLogin(username string) error {
 	return err
 }
 
-//find user's id given its username, returns the id
+// find user's id given its username, returns the id
 func (db *appdbimpl) FindUserId(username string) (error, int) {
 	var id int
 	err := db.c.QueryRow(`SELECT idUser FROM users WHERE username = ?`, username).Scan(&id)
@@ -24,7 +24,7 @@ func (db *appdbimpl) FindUserId(username string) (error, int) {
 
 }
 
-//count how many users have the same username given the username, returns the counter
+// count how many users have the same username given the username, returns the counter
 func (db *appdbimpl) CheckUsername(username string) (error, int) {
 	var count int
 	err := db.c.QueryRow(`SELECT COUNT(*) FROM users WHERE username = ?`, username).Scan(&count)
@@ -36,7 +36,7 @@ func (db *appdbimpl) CheckUsername(username string) (error, int) {
 	return nil, count
 }
 
-//update a user's username given its id and the new username
+// update a user's username given its id and the new username
 func (db *appdbimpl) SetUsername(id int, username string) error {
 
 	var err error
@@ -47,7 +47,7 @@ func (db *appdbimpl) SetUsername(id int, username string) error {
 
 }
 
-//returns all the informations about a user given its id
+// returns all the informations about a user given its id
 func (db *appdbimpl) SelectUser(id int) (error, int, string, string) {
 	var err error
 
@@ -62,4 +62,38 @@ func (db *appdbimpl) SelectUser(id int) (error, int, string, string) {
 	}
 
 	return err, idUser, username, bio
+}
+
+func (db *appdbimpl) FindUserById(id int) (error, int) {
+	var count int
+	err := db.c.QueryRow(`SELECT COUNT(*) FROM users WHERE idUser = ?`, id).Scan(&count)
+
+	if err != nil {
+		return err, -1
+	}
+
+	return err, count
+}
+
+func (db *appdbimpl) FollowUser(idUser int, idUserToFollow int) error {
+	_, err := db.c.Exec(`INSERT INTO follows (idFollower, idFollowed) VALUES (?, ?)`, idUser, idUserToFollow)
+
+	return err
+}
+
+func (db *appdbimpl) CheckBan(idUser int, idUserToCheck int) (error, int) {
+	var count int
+	err := db.c.QueryRow(`SELECT COUNT(*) FROM bans WHERE idUser = ? AND idBanned = ?`, idUser, idUserToCheck).Scan(&count)
+
+	if err != nil {
+		return err, -1
+	}
+
+	return err, count
+}
+
+func (db *appdbimpl) BanUser(idUser int, idUserToBan int) error {
+	_, err := db.c.Exec(`INSERT INTO bans (idUser, idBanned) VALUES (?, ?)`, idUser, idUserToBan)
+
+	return err
 }

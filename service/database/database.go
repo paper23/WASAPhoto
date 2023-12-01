@@ -44,9 +44,17 @@ type AppDatabase interface {
 	CheckUsername(username string) (error, int)
 	SetUsername(id int, username string) error
 	SelectUser(id int) (error, int, string, string)
+	FindUserById(id int) (error, int)
+	FollowUser(idUser int, idUserToFollow int) error
+	BanUser(idUser int, idUserToBan int) error
+	CheckBan(idUser int, idUserToCheck int) (error, int)
 
 	//image
-	InsertPhoto(idOwner int, date string, url string) (error, int64)
+	InsertPhoto(idOwner int, date string, url string) (error, int)
+	SelectImgUrl(idImage int) (error, string)
+	SelectImgDate(idImage int) (error, string)
+	FindImage(idImage int, idOwner int) (error, int)
+	DeleteImage(idImage int, idOwner int) error
 
 	Ping() error
 }
@@ -87,7 +95,7 @@ func (db *appdbimpl) Ping() error {
 }
 
 func createDatabase(db *sql.DB) error {
-	tables := [4]string{
+	tables := [6]string{
 		`CREATE TABLE IF NOT EXISTS users (
 			idUser INTEGER PRIMARY KEY AUTOINCREMENT,
 			username VARCHAR(16) NOT NULL UNIQUE,
@@ -116,6 +124,20 @@ func createDatabase(db *sql.DB) error {
 			FOREIGN KEY(idUserWriter) REFERENCES users (idUser) ON DELETE CASCADE,
 			FOREIGN KEY(idImageCommented) REFERENCES images (idImage) ON DELETE CASCADE
 		);`,
+		`CREATE TABLE IF NOT EXISTS follows(
+			idFollower INTEGER NOT NULL,
+			idFollowed INTEGER NOT NULL,
+			PRIMARY KEY (idFollower,idFollowed),
+			FOREIGN KEY(idFollower) REFERENCES users (idUser) ON DELETE CASCADE,
+			FOREIGN KEY(idFollowed) REFERENCES users (idUser) ON DELETE CASCADE
+			);`,
+		`CREATE TABLE IF NOT EXISTS bans(
+			idUser INTEGER NOT NULL,
+			idBanned INTEGER NOT NULL,
+			PRIMARY KEY (idUser,idBanned),
+			FOREIGN KEY(idUser) REFERENCES users (idUser) ON DELETE CASCADE,
+			FOREIGN KEY(idBanned) REFERENCES users (idUser) ON DELETE CASCADE
+			);`,
 	}
 
 	for i := 0; i < len(tables); i++ {

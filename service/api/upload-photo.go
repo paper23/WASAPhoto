@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"strconv"
 	"time"
-	"fmt"
 
 	"github.com/julienschmidt/httprouter"
 )
@@ -19,7 +18,6 @@ func (rt *_router) uploadPhoto(w http.ResponseWriter, r *http.Request, ps httpro
 
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Println("1")
 		return
 	}
 
@@ -27,7 +25,6 @@ func (rt *_router) uploadPhoto(w http.ResponseWriter, r *http.Request, ps httpro
 	err = json.NewDecoder(r.Body).Decode(&img)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Println("2", err)
 		return
 	}
 
@@ -37,7 +34,6 @@ func (rt *_router) uploadPhoto(w http.ResponseWriter, r *http.Request, ps httpro
 	err, img.IdImage = rt.db.InsertPhoto(img.IdOwner, img.DateTime, img.Url)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Println("3")
 		return
 	}
 	

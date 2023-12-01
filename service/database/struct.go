@@ -7,8 +7,13 @@ type User struct {
 }
 
 type Image struct {
-	IdImage int64 `"json:idImage"`
+	IdImage int `"json:idImage"`
 	IdOwner int `"json:idOwner"`
 	DateTime string `"json:dateTime"`
 	Url	string `"json:url"`
+}
+
+type DoubleIdUser struct {
+	IdUser int `"json:idUser"`
+	IdUser2 int `"json:idUserToFollow"`
 }

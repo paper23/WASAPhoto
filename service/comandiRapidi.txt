@@ -1,0 +1,17 @@
+Login:
+curl -i -X POST -H "Content-Type: application/json" -d '{"username": "paper23"}' localhost:3000/session
+
+SetMyUserName:
+curl -v -X PUT -H "Content-Type: application/json" -d '{"username":"prova12"}' localhost:3000/users/1
+
+UploadPhoto:
+curl -i -X POST -H "Content-Type: application/json" -d '{"url":"/img/photo123.jpg"}' localhost:3000/users/1/images/
+
+DeletePhoto:
+curl -i -X DELETE localhost:3000/users/1/images/1
+
+FollowUser
+curl -i -X POST -H "Content-Type: application/json" -d '{"idUser":2}' localhost:3000/users/1/follows/
+
+BanUser
+curl -i -X POST -H "Content-Type: application/json" -d '{"idUser":2}' localhost:3000/users/1/bans/
