@@ -27,6 +27,11 @@ func (rt *_router) unbanUser(w http.ResponseWriter, r *http.Request, ps httprout
 		return
 	}
 
+	if user.IdUser == userToSban.IdUser {
+		w.WriteHeader(http.StatusForbidden)
+		return
+	}
+
 	var count int
 	err, count = rt.db.FindUserById(userToSban.IdUser)
 	if err != nil {
@@ -43,31 +48,31 @@ func (rt *_router) unbanUser(w http.ResponseWriter, r *http.Request, ps httprout
 		json.NewEncoder(w).Encode(sban)
 		return
 	}
-	//COUNTINUA DA QUA
+
 	count = 0
-	err, count = rt.db.CheckBan(user.IdUser, userToBan.IdUser)
+	err, count = rt.db.CheckBan(user.IdUser, userToSban.IdUser)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	if count > 0 {
+	if count <= 0 {
 		var ban DoubleIdUser
 		ban.IdUser = user.IdUser
-		ban.IdUser2 = userToBan.IdUser
+		ban.IdUser2 = userToSban.IdUser
 		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusForbidden)
+		w.WriteHeader(http.StatusNotFound)
 		json.NewEncoder(w).Encode(ban)
 		return
 	}
 
-	err = rt.db.BanUser(user.IdUser, userToBan.IdUser)
+	err = rt.db.SbanUser(user.IdUser, userToSban.IdUser)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	err, userToBan.IdUser, userToBan.Username, userToBan.Biography = rt.db.SelectUser(userToBan.IdUser)
+	err, userToSban.IdUser, userToSban.Username, userToSban.Biography = rt.db.SelectUser(userToSban.IdUser)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
@@ -75,6 +80,6 @@ func (rt *_router) unbanUser(w http.ResponseWriter, r *http.Request, ps httprout
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
-	json.NewEncoder(w).Encode(userToBan)
+	json.NewEncoder(w).Encode(userToSban)
 
 }

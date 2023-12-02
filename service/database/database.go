@@ -48,6 +48,9 @@ type AppDatabase interface {
 	FollowUser(idUser int, idUserToFollow int) error
 	BanUser(idUser int, idUserToBan int) error
 	CheckBan(idUser int, idUserToCheck int) (error, int)
+	SbanUser(idUser int, idUserToSban int) error
+	CheckFollowing(idUser int, idUserToUnfollow int) (error, int)
+	UnfollowUser(idUser int, idUserToUnfolow int) error
 
 	//image
 	InsertPhoto(idOwner int, date string, url string) (error, int)

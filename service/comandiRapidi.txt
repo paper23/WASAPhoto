@@ -13,5 +13,11 @@ curl -i -X DELETE localhost:3000/users/1/images/1
 FollowUser
 curl -i -X POST -H "Content-Type: application/json" -d '{"idUser":2}' localhost:3000/users/1/follows/
 
+UnfollowUser
+curl -i -X DELETE localhost:3000/users/1/follows/1
+
 BanUser
 curl -i -X POST -H "Content-Type: application/json" -d '{"idUser":2}' localhost:3000/users/1/bans/
+
+UnbanUser
+curl -i -X DELETE localhost:3000/users/1/bans/2

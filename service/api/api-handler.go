@@ -14,6 +14,7 @@ func (rt *_router) Handler() http.Handler {
 	//user
 	rt.router.PUT("/users/:idUser", rt.setMyUserName)
 	rt.router.POST("/users/:idUser/follows/", rt.followUser)
+	rt.router.DELETE("/users/:idUser/follows/:idUserToUnfollow", rt.unfollowUser)
 	rt.router.POST("/users/:idUser/bans/", rt.banUser)
 	rt.router.DELETE("/users/:idUser/bans/:idUserBanned", rt.unbanUser)
 

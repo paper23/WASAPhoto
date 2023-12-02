@@ -9,10 +9,10 @@ import (
 )
 
 // following an existing user using data provided in the body of the request and the user id in the path
-func (rt *_router) followUser(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (rt *_router) unfollowUser(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 	var user User
-	var userToFollow User
+	var userToUnfollow User
 	var err error
 
 	user.IdUser, err = strconv.Atoi(ps.ByName("idUser"))
@@ -21,19 +21,19 @@ func (rt *_router) followUser(w http.ResponseWriter, r *http.Request, ps httprou
 		return
 	}
 
-	err = json.NewDecoder(r.Body).Decode(&userToFollow)
+	userToUnfollow.IdUser, err = strconv.Atoi(ps.ByName("idUserToUnfollow"))
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	if user.IdUser == userToFollow.IdUser {
+	if user.IdUser == userToUnfollow.IdUser {
 		w.WriteHeader(http.StatusForbidden)
 		return
 	}
 
 	var count int
-	err, count = rt.db.FindUserById(userToFollow.IdUser)
+	err, count = rt.db.FindUserById(userToUnfollow.IdUser)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
@@ -42,44 +42,37 @@ func (rt *_router) followUser(w http.ResponseWriter, r *http.Request, ps httprou
 	if count <= 0 {
 		var follow DoubleIdUser
 		follow.IdUser = user.IdUser
-		follow.IdUser2 = userToFollow.IdUser
+		follow.IdUser2 = userToUnfollow.IdUser
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusNotFound)
 		json.NewEncoder(w).Encode(follow)
 		return
 	}
+
 	count = 0
-	var count2 int
-	err, count = rt.db.CheckBan(user.IdUser, userToFollow.IdUser)
-
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-	err, count2 = rt.db.CheckBan(userToFollow.IdUser, user.IdUser)
-
+	err, count = rt.db.CheckFollowing(user.IdUser, userToUnfollow.IdUser)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	if count+count2 > 0 {
+	if count <= 0 {
 		var follow DoubleIdUser
 		follow.IdUser = user.IdUser
-		follow.IdUser2 = userToFollow.IdUser
+		follow.IdUser2 = userToUnfollow.IdUser
 		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusForbidden)
+		w.WriteHeader(http.StatusNotFound)
 		json.NewEncoder(w).Encode(follow)
 		return
 	}
 
-	err = rt.db.FollowUser(user.IdUser, userToFollow.IdUser)
+	err = rt.db.UnfollowUser(user.IdUser, userToUnfollow.IdUser)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	err, userToFollow.IdUser, userToFollow.Username, userToFollow.Biography = rt.db.SelectUser(userToFollow.IdUser)
+	err, userToUnfollow.IdUser, userToUnfollow.Username, userToUnfollow.Biography = rt.db.SelectUser(userToUnfollow.IdUser)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
@@ -87,6 +80,6 @@ func (rt *_router) followUser(w http.ResponseWriter, r *http.Request, ps httprou
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
-	json.NewEncoder(w).Encode(userToFollow)
+	json.NewEncoder(w).Encode(userToUnfollow)
 
 }

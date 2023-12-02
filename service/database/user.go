@@ -92,8 +92,57 @@ func (db *appdbimpl) CheckBan(idUser int, idUserToCheck int) (error, int) {
 	return err, count
 }
 
+func (db *appdbimpl) SbanUser(idUser int, idUserToSban int) error {
+	_, err := db.c.Exec(`DELETE FROM bans WHERE idUser = ? AND idBanned = ?`, idUser, idUserToSban)
+
+	return err
+}
+
+func (db *appdbimpl) CheckFollowing(idUser int, idUserToUnfollow int) (error, int) {
+	var count int
+	err := db.c.QueryRow(`SELECT COUNT(*) FROM follows WHERE idFollower = ? AND idFollowed = ?`, idUser, idUserToUnfollow).Scan(&count)
+
+	if err != nil {
+		return err, -1
+	}
+
+	return err, count
+}
+
+func (db *appdbimpl) UnfollowUser(idUser int, idUserToUnfollow int) error {
+	_, err := db.c.Exec(`DELETE FROM follows WHERE idFollower = ? AND idFollowed = ?`, idUser, idUserToUnfollow)
+
+	return err
+}
+
 func (db *appdbimpl) BanUser(idUser int, idUserToBan int) error {
-	_, err := db.c.Exec(`INSERT INTO bans (idUser, idBanned) VALUES (?, ?)`, idUser, idUserToBan)
+
+	var count int
+	var err error
+	err, count = db.CheckFollowing(idUser, idUserToBan)
+	if err != nil {
+		return err
+	}
+	if count > 0 {
+		err = db.UnfollowUser(idUser, idUserToBan)
+		if err != nil {
+			return err
+		}
+	}
+	count = 0
+
+	err, count = db.CheckFollowing(idUserToBan, idUser)
+	if err != nil {
+		return err
+	}
+	if count > 0 {
+		err = db.UnfollowUser(idUserToBan, idUser)
+		if err != nil {
+			return err
+		}
+	}
+
+	_, err = db.c.Exec(`INSERT INTO bans (idUser, idBanned) VALUES (?, ?)`, idUser, idUserToBan)
 
 	return err
 }

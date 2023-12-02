@@ -27,6 +27,11 @@ func (rt *_router) banUser(w http.ResponseWriter, r *http.Request, ps httprouter
 		return
 	}
 
+	if user.IdUser == userToBan.IdUser {
+		w.WriteHeader(http.StatusForbidden)
+		return
+	}
+
 	var count int
 	err, count = rt.db.FindUserById(userToBan.IdUser)
 	if err != nil {
@@ -60,7 +65,7 @@ func (rt *_router) banUser(w http.ResponseWriter, r *http.Request, ps httprouter
 		json.NewEncoder(w).Encode(ban)
 		return
 	}
-
+	//QUANDO SI BANNA QUALCUNO BISOGNA TOGLIERE ANCHE FOLLOWS (FATTO) LIKE E COMMENTI!
 	err = rt.db.BanUser(user.IdUser, userToBan.IdUser)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
