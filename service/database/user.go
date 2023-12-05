@@ -117,30 +117,18 @@ func (db *appdbimpl) UnfollowUser(idUser int, idUserToUnfollow int) error {
 
 func (db *appdbimpl) BanUser(idUser int, idUserToBan int) error {
 
-	var count int
 	var err error
-	err, count = db.CheckFollowing(idUser, idUserToBan)
+	err = db.UnfollowUser(idUser, idUserToBan)
 	if err != nil {
 		return err
 	}
-	if count > 0 {
-		err = db.UnfollowUser(idUser, idUserToBan)
-		if err != nil {
-			return err
-		}
-	}
-	count = 0
 
-	err, count = db.CheckFollowing(idUserToBan, idUser)
+	err = db.UnfollowUser(idUserToBan, idUser)
 	if err != nil {
 		return err
 	}
-	if count > 0 {
-		err = db.UnfollowUser(idUserToBan, idUser)
-		if err != nil {
-			return err
-		}
-	}
+
+	//CANCELLARE LIKE
 
 	_, err = db.c.Exec(`INSERT INTO bans (idUser, idBanned) VALUES (?, ?)`, idUser, idUserToBan)
 

@@ -21,3 +21,15 @@ curl -i -X POST -H "Content-Type: application/json" -d '{"idUser":2}' localhost:
 
 UnbanUser
 curl -i -X DELETE localhost:3000/users/1/bans/2
+
+CommentPhoto
+curl -i -X POST -H "Content-Type: application/json" -d '{"idUserWriter":2, "text":"Questa è una prova di commento"}' localhost:3000/users/1/images/1/comments/
+
+UncommentPhoto
+curl -i -X DELETE localhost:3000/users/1/images/1/comments/1
+
+LikePhoto
+curl -i -X POST -H "Content-Type: application/json" -d '{"idLiker":2}' localhost:3000/users/1/images/1/likes/
+
+UnlikePhoto
+curl -i -X DELETE localhost:3000/users/1/images/1/likes/1

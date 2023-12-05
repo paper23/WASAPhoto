@@ -65,7 +65,7 @@ func (rt *_router) banUser(w http.ResponseWriter, r *http.Request, ps httprouter
 		json.NewEncoder(w).Encode(ban)
 		return
 	}
-	//QUANDO SI BANNA QUALCUNO BISOGNA TOGLIERE ANCHE FOLLOWS (FATTO) LIKE E COMMENTI!
+	//QUANDO SI BANNA QUALCUNO BISOGNA TOGLIERE ANCHE FOLLOWS (FATTO) E LIKE!
 	err = rt.db.BanUser(user.IdUser, userToBan.IdUser)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)

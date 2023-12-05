@@ -58,6 +58,14 @@ type AppDatabase interface {
 	SelectImgDate(idImage int) (error, string)
 	FindImage(idImage int, idOwner int) (error, int)
 	DeleteImage(idImage int, idOwner int) error
+	CommentPhoto(idUserWriter int, idImage int, text string) (error, int)
+	FindComment(idComment int) (error, int)
+	SelectCommentText(idComment int) (error, string)
+	CheckOwnership(idComment int, idUserWriter int) (error, bool)
+	UncommentPhoto(idComment int) error
+	LikePhoto(idLiker int, idImage int) error
+	CheckLike(idLiker int, idImage int) (error, int)
+	UnlikePhoto(idLiker int, idImage int) error
 
 	Ping() error
 }
@@ -119,11 +127,10 @@ func createDatabase(db *sql.DB) error {
 			FOREIGN KEY(idImageLiked) REFERENCES images (idImage) ON DELETE CASCADE
 		);`,
 		`CREATE TABLE IF NOT EXISTS comments (
-			idComment INTEGER NOT NULL,
+			idComment INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
 			idUserWriter INTEGER NOT NULL,
 			idImageCommented INTEGER NOT NULL,
 			text VARCHAR(200) NOT NULL,
-			PRIMARY KEY (idComment, idUserWriter, idImageCommented),
 			FOREIGN KEY(idUserWriter) REFERENCES users (idUser) ON DELETE CASCADE,
 			FOREIGN KEY(idImageCommented) REFERENCES images (idImage) ON DELETE CASCADE
 		);`,
