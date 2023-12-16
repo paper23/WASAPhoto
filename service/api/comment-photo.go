@@ -8,22 +8,54 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-// comment on a photo given its id, the id of the owner of the photo, the id of the user who comments on the photo and the text of the comment
+/*
+comment on an existing photo using data provided in the
+body of request, the id of the owner of the photo and
+the id of the photo, return the full image object and the
+comment object
+*/
 func (rt *_router) commentPhoto(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 	var comm Commenting
 	var err error
-	comm.IdOwner, err = strconv.Atoi(ps.ByName("idUser"))
 
+	comm.IdOwner, err = strconv.Atoi(ps.ByName("idUser"))
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	comm.IdImage, err = strconv.Atoi(ps.ByName("idImage"))
-
+	var count int
+	err, count = rt.db.FindUserById(comm.IdOwner)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	//404 - user (owner) not found, not commented
+	if count <= 0 {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusNotFound)
+		json.NewEncoder(w).Encode(comm.IdOwner)
+		return
+	}
+
+	comm.IdImage, err = strconv.Atoi(ps.ByName("idImage"))
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	err, count = rt.db.FindImage(comm.IdImage, comm.IdOwner)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	//404 - image not found, not commented
+	if count <= 0 {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusNotFound)
+		json.NewEncoder(w).Encode(comm.IdOwner)
+		json.NewEncoder(w).Encode(comm.IdImage)
 		return
 	}
 
@@ -33,28 +65,16 @@ func (rt *_router) commentPhoto(w http.ResponseWriter, r *http.Request, ps httpr
 		return
 	}
 
-	var count int
-	err, count = rt.db.FindImage(comm.IdImage, comm.IdOwner)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-	if count <= 0 {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusNotFound)
-		json.NewEncoder(w).Encode(comm)
-		return
-	}
-
 	err, count = rt.db.FindUserById(comm.IdUserWriter)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
+	//404 - user (writer) not found, not commented
 	if count <= 0 {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusNotFound)
-		json.NewEncoder(w).Encode(comm)
+		json.NewEncoder(w).Encode(comm.IdUserWriter)
 		return
 	}
 
@@ -63,6 +83,7 @@ func (rt *_router) commentPhoto(w http.ResponseWriter, r *http.Request, ps httpr
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
+	//403 - you have been banned from the image owner, not commented
 	if count > 0 {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusForbidden)
@@ -75,6 +96,7 @@ func (rt *_router) commentPhoto(w http.ResponseWriter, r *http.Request, ps httpr
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
+	//403 - you have banned the image owner, not commented
 	if count > 0 {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusForbidden)
@@ -88,8 +110,9 @@ func (rt *_router) commentPhoto(w http.ResponseWriter, r *http.Request, ps httpr
 		return
 	}
 
+	//200 - comment succesfully uploaded
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
+	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(comm)
 
 }

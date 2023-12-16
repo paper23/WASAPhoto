@@ -8,27 +8,29 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-// following an existing user using data provided in the body of the request and the user id in the path
+// unban an existing (and already banned) user given its id
 func (rt *_router) unbanUser(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 	var user User
 	var userToSban User
 	var err error
+	var token int
+
+	token, err = strconv.Atoi(extractBearer(r.Header.Get("Authorization")))
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	//401 - you must be logged in, not banned
+	if isNotLogged(token) {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
 
 	user.IdUser, err = strconv.Atoi(ps.ByName("idUser"))
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	userToSban.IdUser, err = strconv.Atoi(ps.ByName("idUserBanned"))
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	if user.IdUser == userToSban.IdUser {
-		w.WriteHeader(http.StatusForbidden)
 		return
 	}
 
@@ -39,30 +41,66 @@ func (rt *_router) unbanUser(w http.ResponseWriter, r *http.Request, ps httprout
 		return
 	}
 
+	//404 - user (sbanner) not found, not sbanned
 	if count <= 0 {
-		var sban DoubleIdUser
-		sban.IdUser = user.IdUser
-		sban.IdUser2 = userToSban.IdUser
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusNotFound)
-		json.NewEncoder(w).Encode(sban)
+		json.NewEncoder(w).Encode(user.IdUser)
 		return
 	}
 
-	count = 0
+	userToSban.IdUser, err = strconv.Atoi(ps.ByName("idUserBanned"))
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	err, count = rt.db.FindUserById(userToSban.IdUser)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	//404 - user (to sban) not found, not sbanned
+	if count <= 0 {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusNotFound)
+		json.NewEncoder(w).Encode(userToSban.IdUser)
+		return
+	}
+
+	//403 - you can't sban an user for another user, not sbanned
+	if token != user.IdUser {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusNotFound)
+		json.NewEncoder(w).Encode(user.IdUser)
+		json.NewEncoder(w).Encode(userToSban.IdUser)
+		json.NewEncoder(w).Encode(token)
+		return
+	}
+
+	//403 - you can't sban yourself, not sbanned
+	if user.IdUser == userToSban.IdUser {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusForbidden)
+		json.NewEncoder(w).Encode(user.IdUser)
+		json.NewEncoder(w).Encode(userToSban.IdUser)
+		json.NewEncoder(w).Encode(token)
+		return
+	}
+
 	err, count = rt.db.CheckBan(user.IdUser, userToSban.IdUser)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
+	//404 - user not banned, non sbanned
 	if count <= 0 {
-		var ban DoubleIdUser
-		ban.IdUser = user.IdUser
-		ban.IdUser2 = userToSban.IdUser
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusNotFound)
-		json.NewEncoder(w).Encode(ban)
+		json.NewEncoder(w).Encode(user.IdUser)
+		json.NewEncoder(w).Encode(userToSban.IdUser)
 		return
 	}
 
@@ -78,8 +116,9 @@ func (rt *_router) unbanUser(w http.ResponseWriter, r *http.Request, ps httprout
 		return
 	}
 
+	//200 - user sbanned succesfully
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
+	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(userToSban)
 
 }

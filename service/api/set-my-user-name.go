@@ -13,15 +13,48 @@ func (rt *_router) setMyUserName(w http.ResponseWriter, r *http.Request, ps http
 	w.Header().Set("content-type", "application/json")
 
 	var user User
-	var id int
-	id, err := strconv.Atoi(ps.ByName("idUser"))
+	var err error
+	var token int
 
+	token, err = strconv.Atoi(extractBearer(r.Header.Get("Authorization")))
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	user.IdUser = id
+	//401 - you must be logged in, username not changed
+	if isNotLogged(token) {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	user.IdUser, err = strconv.Atoi(ps.ByName("idUser"))
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	//403 - you can't change the username of another user, username not changed
+	if token != user.IdUser {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusForbidden)
+		json.NewEncoder(w).Encode(user.IdUser)
+		json.NewEncoder(w).Encode(token)
+		return
+	}
+
+	var count int
+	err, count = rt.db.FindUserById(user.IdUser)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	//404 - user id not found, username not changed
+	if count <= 0 {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusNotFound)
+		json.NewEncoder(w).Encode(user.IdUser)
+	}
 
 	err = json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
@@ -29,33 +62,33 @@ func (rt *_router) setMyUserName(w http.ResponseWriter, r *http.Request, ps http
 		return
 	}
 
-	var count int
 	err, count = rt.db.CheckUsername(user.Username)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	if count == 0 {
-		err = rt.db.SetUsername(user.IdUser, user.Username)
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-		var id int
-		var usrName string
-		var bio string
-		err, id, usrName, bio = rt.db.SelectUser(user.IdUser)
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-
+	// 409 - username already used, username not changed
+	if count > 0 {
 		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(UserToJson(id, usrName, bio))
-
-	} else {
-		w.WriteHeader(409) //http.Conflict
+		w.WriteHeader(http.StatusConflict)
+		json.NewEncoder(w).Encode(user.Username)
 		return
 	}
+
+	err = rt.db.SetUsername(user.IdUser, user.Username)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	err, user.Biography = rt.db.FindUserBio(user.IdUser)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	//200 - username succesfully changed
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(user)
 }

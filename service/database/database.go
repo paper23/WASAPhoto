@@ -51,6 +51,7 @@ type AppDatabase interface {
 	SbanUser(idUser int, idUserToSban int) error
 	CheckFollowing(idUser int, idUserToUnfollow int) (error, int)
 	UnfollowUser(idUser int, idUserToUnfolow int) error
+	FindUserBio(idUser int) (error, string)
 
 	//image
 	InsertPhoto(idOwner int, date string, url string) (error, int)
@@ -61,11 +62,12 @@ type AppDatabase interface {
 	CommentPhoto(idUserWriter int, idImage int, text string) (error, int)
 	FindComment(idComment int) (error, int)
 	SelectCommentText(idComment int) (error, string)
-	CheckOwnership(idComment int, idUserWriter int) (error, bool)
+	CheckCommentOwnership(idComment int, idUserWriter int) (error, bool)
 	UncommentPhoto(idComment int) error
 	LikePhoto(idLiker int, idImage int) error
 	CheckLike(idLiker int, idImage int) (error, int)
 	UnlikePhoto(idLiker int, idImage int) error
+	CheckPhotoOwnership(idImage int, idOwner int) (error, int)
 
 	Ping() error
 }

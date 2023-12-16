@@ -42,7 +42,7 @@ func (db *appdbimpl) SelectCommentText(idComment int) (error, string) {
 	return err, text
 }
 
-func (db *appdbimpl) CheckOwnership(idComment int, idUserWriter int) (error, bool) {
+func (db *appdbimpl) CheckCommentOwnership(idComment int, idUserWriter int) (error, bool) {
 	var count int
 	err := db.c.QueryRow(`SELECT COUNT(*) FROM comments WHERE idComment = ? AND idUserWriter = ?`, idComment, idUserWriter).Scan(&count)
 

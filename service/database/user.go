@@ -128,9 +128,18 @@ func (db *appdbimpl) BanUser(idUser int, idUserToBan int) error {
 		return err
 	}
 
-	//CANCELLARE LIKE
-
 	_, err = db.c.Exec(`INSERT INTO bans (idUser, idBanned) VALUES (?, ?)`, idUser, idUserToBan)
 
 	return err
+}
+
+func (db *appdbimpl) FindUserBio(idUser int) (error, string) {
+	var bio string
+	err := db.c.QueryRow(`SELECT biography FROM users WHERE idUser = ?`, idUser).Scan(&bio)
+
+	if err != nil {
+		return err, ""
+	}
+
+	return err, bio
 }

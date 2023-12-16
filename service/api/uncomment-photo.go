@@ -8,22 +8,48 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-// remove an existing comment given its id, the id of the owner of the photo, the id of the user who comments on the photo
+// remove an existing comment given its id, the photo id and the owner of the photo id
 func (rt *_router) uncommentPhoto(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 	var comm Commenting
 	var err error
 	comm.IdOwner, err = strconv.Atoi(ps.ByName("idUser"))
-
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	comm.IdImage, err = strconv.Atoi(ps.ByName("idImage"))
-
+	var count int
+	err, count = rt.db.FindUserById(comm.IdOwner)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	//404 - user not found, comment not deleted
+	if count <= 0 {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusNotFound)
+		json.NewEncoder(w).Encode(comm.IdOwner)
+		return
+	}
+
+	comm.IdImage, err = strconv.Atoi(ps.ByName("idImage"))
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	err, count = rt.db.FindImage(comm.IdImage, comm.IdOwner)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	//404 - image not found, comment not deleted
+	if count <= 0 {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusNotFound)
+		json.NewEncoder(w).Encode(comm.IdOwner)
+		json.NewEncoder(w).Encode(comm.IdImage)
 		return
 	}
 
@@ -33,28 +59,16 @@ func (rt *_router) uncommentPhoto(w http.ResponseWriter, r *http.Request, ps htt
 		return
 	}
 
-	var count int
-	err, count = rt.db.FindImage(comm.IdImage, comm.IdOwner)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-	if count <= 0 {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusNotFound)
-		json.NewEncoder(w).Encode(comm)
-		return
-	}
-
 	err, count = rt.db.FindComment(comm.IdComment)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
+	//404 - comment not found, comment not deleted
 	if count <= 0 {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusNotFound)
-		json.NewEncoder(w).Encode(comm)
+		json.NewEncoder(w).Encode(comm.IdComment)
 		return
 	}
 
@@ -63,20 +77,6 @@ func (rt *_router) uncommentPhoto(w http.ResponseWriter, r *http.Request, ps htt
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	/*
-		var check bool
-		err, check = rt.db.CheckOwnership(comm.IdComment, comm.IdUserWriter)
-		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			return
-		}
-		if !check {
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusForbidden)
-			json.NewEncoder(w).Encode(comm)
-			return
-		}
-	*/
 
 	err = rt.db.UncommentPhoto(comm.IdComment)
 	if err != nil {
@@ -84,8 +84,9 @@ func (rt *_router) uncommentPhoto(w http.ResponseWriter, r *http.Request, ps htt
 		return
 	}
 
+	//200 - comment succesfully deleted
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
+	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(comm)
 
 }
