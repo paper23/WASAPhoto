@@ -643,7 +643,7 @@ paths:
       operationId: unlikePhoto
       summary: remove an existing like
       description: |
-        remove a like given its id, the photo id and the owner of the photo id
+        remove a like given its id (the user liker id), the photo id and the owner of the photo id
       parameters:
       - name: idUser
         in: path
@@ -659,42 +659,29 @@ paths:
         required: true
       - name: idLike
         in: path
-        description: the identifier of the like
+        description: the identifier of the like (it's the id of the user who liked the photo)
         schema:
           type: integer
         required: true
       responses:
         "200":
-          description: like succesfully deleted
+          description: photo succesfully unliked
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Like" }
         "401":
-          description: unauthorized, only the owner can delete a like, like not deleted
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    description: error type
-                    type: string
-                    example: you are not the owner of the like or you are not logged in, like not deleted
+          description: you must be logged in, not unliked
         "404":
-          description: like not found, like not deleted
+          description: user/photo not found, not unliked
           content:
             application/json:
-              schema:
-                type: object
-                properties:
-                  idLike:
-                    description: the identifier of the like to delete
-                    type: integer
-                    example: 1
-                  error:
-                    description: error type
-                    type: string
-                    example: like id not found, like not deleted
+              schema: { $ref: "#/components/schemas/Like" }
+        "403":
+          description: |
+            you can't unlike a photo for another user/you have been banned/you have banned the user/you can't unlike a photo you haven't liked yet, not unliked
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Like" }
   
   /users/{idUser}:
     #getUserProfile
