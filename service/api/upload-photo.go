@@ -26,7 +26,7 @@ func (rt *_router) uploadPhoto(w http.ResponseWriter, r *http.Request, ps httpro
 		return
 	}
 
-	//401 - you must be logged in, photo not uploaded
+	// 401 - you must be logged in, photo not uploaded
 	if isNotLogged(token) {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
@@ -38,7 +38,7 @@ func (rt *_router) uploadPhoto(w http.ResponseWriter, r *http.Request, ps httpro
 		return
 	}
 
-	//403 - you cannot upload a photo for another user, photo not uploaded
+	// 403 - you cannot upload a photo for another user, photo not uploaded
 	if token != img.IdOwner {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusForbidden)
@@ -53,7 +53,7 @@ func (rt *_router) uploadPhoto(w http.ResponseWriter, r *http.Request, ps httpro
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	//404 - user not found, photo not uploaded
+	// 404 - user not found, photo not uploaded
 	if count <= 0 {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusNotFound)
@@ -75,7 +75,7 @@ func (rt *_router) uploadPhoto(w http.ResponseWriter, r *http.Request, ps httpro
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	//201 - photo succesfully uploaded
+	// 201 - photo succesfully uploaded
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(img)

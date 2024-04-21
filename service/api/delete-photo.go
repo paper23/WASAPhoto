@@ -13,6 +13,20 @@ func (rt *_router) deletePhoto(w http.ResponseWriter, r *http.Request, ps httpro
 
 	var img Image
 	var err error
+	var token int
+
+	token, err = strconv.Atoi(extractBearer(r.Header.Get("Authorization")))
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	// 401 - you must be logged in, photo not uploaded
+	if isNotLogged(token) {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
 	img.IdOwner, err = strconv.Atoi(ps.ByName("idUser"))
 
 	if err != nil {
@@ -26,7 +40,7 @@ func (rt *_router) deletePhoto(w http.ResponseWriter, r *http.Request, ps httpro
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	//404 - user not found, photo not deleted
+	// 404 - user not found, photo not deleted
 	if count <= 0 {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusNotFound)
@@ -46,7 +60,7 @@ func (rt *_router) deletePhoto(w http.ResponseWriter, r *http.Request, ps httpro
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	//404 - photo not found, photo not deleted
+	// 404 - photo not found, photo not deleted
 	if count <= 0 {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusNotFound)
@@ -59,7 +73,7 @@ func (rt *_router) deletePhoto(w http.ResponseWriter, r *http.Request, ps httpro
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	//401 - unauthorized, only the owner can delete a photo, photo not deleted
+	// 401 - unauthorized, only the owner can delete a photo, photo not deleted
 	if count <= 0 {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusUnauthorized)
@@ -84,7 +98,7 @@ func (rt *_router) deletePhoto(w http.ResponseWriter, r *http.Request, ps httpro
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	//200 - photo succesfully deleted
+	// 200 - photo succesfully deleted
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(img)

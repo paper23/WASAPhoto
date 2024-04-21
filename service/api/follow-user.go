@@ -25,7 +25,7 @@ func (rt *_router) followUser(w http.ResponseWriter, r *http.Request, ps httprou
 		return
 	}
 
-	//401 - you must be logged in, not followed
+	// 401 - you must be logged in, not followed
 	if isNotLogged(token) {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
@@ -43,7 +43,7 @@ func (rt *_router) followUser(w http.ResponseWriter, r *http.Request, ps httprou
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	//404 - user (follower) not found, not followed
+	// 404 - user (follower) not found, not followed
 	if count <= 0 {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusNotFound)
@@ -62,7 +62,7 @@ func (rt *_router) followUser(w http.ResponseWriter, r *http.Request, ps httprou
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	//404 - user (to follow) not found, not followed
+	// 404 - user (to follow) not found, not followed
 	if count <= 0 {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusNotFound)
@@ -70,7 +70,7 @@ func (rt *_router) followUser(w http.ResponseWriter, r *http.Request, ps httprou
 		return
 	}
 
-	//403 - you cannot follow an user for another user, not followed
+	// 403 - you cannot follow an user for another user, not followed
 	if token != user.IdUser {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusForbidden)
@@ -80,7 +80,7 @@ func (rt *_router) followUser(w http.ResponseWriter, r *http.Request, ps httprou
 		return
 	}
 
-	//403 - you can't follow yourself, not followed
+	// 403 - you can't follow yourself, not followed
 	if user.IdUser == userToFollow.IdUser {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusForbidden)
@@ -104,7 +104,7 @@ func (rt *_router) followUser(w http.ResponseWriter, r *http.Request, ps httprou
 		return
 	}
 
-	//403 - you have been banned from the user and/or you have banned the user, not followed
+	// 403 - you have been banned from the user and/or you have banned the user, not followed
 	if count+count2 > 0 {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusForbidden)
@@ -126,7 +126,7 @@ func (rt *_router) followUser(w http.ResponseWriter, r *http.Request, ps httprou
 		return
 	}
 
-	//200 - user succesfully followed
+	// 200 - user succesfully followed
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(userToFollow)

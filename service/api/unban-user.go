@@ -22,7 +22,7 @@ func (rt *_router) unbanUser(w http.ResponseWriter, r *http.Request, ps httprout
 		return
 	}
 
-	//401 - you must be logged in, not banned
+	// 401 - you must be logged in, not banned
 	if isNotLogged(token) {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
@@ -41,7 +41,7 @@ func (rt *_router) unbanUser(w http.ResponseWriter, r *http.Request, ps httprout
 		return
 	}
 
-	//404 - user (sbanner) not found, not sbanned
+	// 404 - user (sbanner) not found, not sbanned
 	if count <= 0 {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusNotFound)
@@ -61,7 +61,7 @@ func (rt *_router) unbanUser(w http.ResponseWriter, r *http.Request, ps httprout
 		return
 	}
 
-	//404 - user (to sban) not found, not sbanned
+	// 404 - user (to sban) not found, not sbanned
 	if count <= 0 {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusNotFound)
@@ -69,7 +69,7 @@ func (rt *_router) unbanUser(w http.ResponseWriter, r *http.Request, ps httprout
 		return
 	}
 
-	//403 - you can't sban an user for another user, not sbanned
+	// 403 - you can't sban an user for another user, not sbanned
 	if token != user.IdUser {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusNotFound)
@@ -79,7 +79,7 @@ func (rt *_router) unbanUser(w http.ResponseWriter, r *http.Request, ps httprout
 		return
 	}
 
-	//403 - you can't sban yourself, not sbanned
+	// 403 - you can't sban yourself, not sbanned
 	if user.IdUser == userToSban.IdUser {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusForbidden)
@@ -95,7 +95,7 @@ func (rt *_router) unbanUser(w http.ResponseWriter, r *http.Request, ps httprout
 		return
 	}
 
-	//404 - user not banned, non sbanned
+	// 404 - user not banned, non sbanned
 	if count <= 0 {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusNotFound)
@@ -116,7 +116,7 @@ func (rt *_router) unbanUser(w http.ResponseWriter, r *http.Request, ps httprout
 		return
 	}
 
-	//200 - user sbanned succesfully
+	// 200 - user sbanned succesfully
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(userToSban)

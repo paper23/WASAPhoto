@@ -18,6 +18,19 @@ func (rt *_router) commentPhoto(w http.ResponseWriter, r *http.Request, ps httpr
 
 	var comm Commenting
 	var err error
+	var token int
+
+	token, err = strconv.Atoi(extractBearer(r.Header.Get("Authorization")))
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	// 401 - you must be logged in, photo not uploaded
+	if isNotLogged(token) {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
 
 	comm.IdOwner, err = strconv.Atoi(ps.ByName("idUser"))
 	if err != nil {
@@ -31,7 +44,7 @@ func (rt *_router) commentPhoto(w http.ResponseWriter, r *http.Request, ps httpr
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	//404 - user (owner) not found, not commented
+	// 404 - user (owner) not found, not commented
 	if count <= 0 {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusNotFound)
@@ -50,7 +63,7 @@ func (rt *_router) commentPhoto(w http.ResponseWriter, r *http.Request, ps httpr
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	//404 - image not found, not commented
+	// 404 - image not found, not commented
 	if count <= 0 {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusNotFound)
@@ -70,7 +83,7 @@ func (rt *_router) commentPhoto(w http.ResponseWriter, r *http.Request, ps httpr
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	//404 - user (writer) not found, not commented
+	// 404 - user (writer) not found, not commented
 	if count <= 0 {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusNotFound)
@@ -83,7 +96,7 @@ func (rt *_router) commentPhoto(w http.ResponseWriter, r *http.Request, ps httpr
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	//403 - you have been banned from the image owner, not commented
+	// 403 - you have been banned from the image owner, not commented
 	if count > 0 {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusForbidden)
@@ -96,7 +109,7 @@ func (rt *_router) commentPhoto(w http.ResponseWriter, r *http.Request, ps httpr
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	//403 - you have banned the image owner, not commented
+	// 403 - you have banned the image owner, not commented
 	if count > 0 {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusForbidden)
@@ -110,7 +123,7 @@ func (rt *_router) commentPhoto(w http.ResponseWriter, r *http.Request, ps httpr
 		return
 	}
 
-	//200 - comment succesfully uploaded
+	// 200 - comment succesfully uploaded
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(comm)

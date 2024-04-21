@@ -23,7 +23,7 @@ func (rt *_router) likePhoto(w http.ResponseWriter, r *http.Request, ps httprout
 		return
 	}
 
-	//401 - you must be logged in, not banned
+	// 401 - you must be logged in, not banned
 	if isNotLogged(like.IdLiker) {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
@@ -48,7 +48,7 @@ func (rt *_router) likePhoto(w http.ResponseWriter, r *http.Request, ps httprout
 		return
 	}
 
-	//404 - user (liker) not found, not liked
+	// 404 - user (liker) not found, not liked
 	if count <= 0 {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusNotFound)
@@ -62,7 +62,7 @@ func (rt *_router) likePhoto(w http.ResponseWriter, r *http.Request, ps httprout
 		return
 	}
 
-	//404 - user (owner) not found, not liked
+	// 404 - user (owner) not found, not liked
 	if count <= 0 {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusNotFound)
@@ -76,7 +76,7 @@ func (rt *_router) likePhoto(w http.ResponseWriter, r *http.Request, ps httprout
 		return
 	}
 
-	//404 - image not found, not liked
+	// 404 - image not found, not liked
 	if count <= 0 {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusNotFound)
@@ -91,7 +91,7 @@ func (rt *_router) likePhoto(w http.ResponseWriter, r *http.Request, ps httprout
 		return
 	}
 
-	//403 - you can't like a photo of a user who has banned you, not liked
+	// 403 - you can't like a photo of a user who has banned you, not liked
 	if count > 0 {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusForbidden)
@@ -105,7 +105,7 @@ func (rt *_router) likePhoto(w http.ResponseWriter, r *http.Request, ps httprout
 		return
 	}
 
-	//403 - you can't like a photo of a user you have banned, not liked
+	// 403 - you can't like a photo of a user you have banned, not liked
 	if count > 0 {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusForbidden)
@@ -119,7 +119,7 @@ func (rt *_router) likePhoto(w http.ResponseWriter, r *http.Request, ps httprout
 		return
 	}
 
-	//403 - you can't like a photo you have already liked, not liked
+	// 403 - you can't like a photo you have already liked, not liked
 	if count > 0 {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusForbidden)
@@ -133,7 +133,7 @@ func (rt *_router) likePhoto(w http.ResponseWriter, r *http.Request, ps httprout
 		return
 	}
 
-	//200 - photo succesfully liked
+	// 200 - photo succesfully liked
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(like)

@@ -13,6 +13,20 @@ func (rt *_router) uncommentPhoto(w http.ResponseWriter, r *http.Request, ps htt
 
 	var comm Commenting
 	var err error
+	var token int
+
+	token, err = strconv.Atoi(extractBearer(r.Header.Get("Authorization")))
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	// 401 - you must be logged in, photo not uploaded
+	if isNotLogged(token) {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
 	comm.IdOwner, err = strconv.Atoi(ps.ByName("idUser"))
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -25,7 +39,7 @@ func (rt *_router) uncommentPhoto(w http.ResponseWriter, r *http.Request, ps htt
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	//404 - user not found, comment not deleted
+	// 404 - user not found, comment not deleted
 	if count <= 0 {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusNotFound)
@@ -44,7 +58,7 @@ func (rt *_router) uncommentPhoto(w http.ResponseWriter, r *http.Request, ps htt
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	//404 - image not found, comment not deleted
+	// 404 - image not found, comment not deleted
 	if count <= 0 {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusNotFound)
@@ -64,7 +78,7 @@ func (rt *_router) uncommentPhoto(w http.ResponseWriter, r *http.Request, ps htt
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	//404 - comment not found, comment not deleted
+	// 404 - comment not found, comment not deleted
 	if count <= 0 {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusNotFound)
@@ -84,7 +98,7 @@ func (rt *_router) uncommentPhoto(w http.ResponseWriter, r *http.Request, ps htt
 		return
 	}
 
-	//200 - comment succesfully deleted
+	// 200 - comment succesfully deleted
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(comm)

@@ -22,7 +22,7 @@ func (rt *_router) setMyUserName(w http.ResponseWriter, r *http.Request, ps http
 		return
 	}
 
-	//401 - you must be logged in, username not changed
+	// 401 - you must be logged in, username not changed
 	if isNotLogged(token) {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
@@ -34,7 +34,7 @@ func (rt *_router) setMyUserName(w http.ResponseWriter, r *http.Request, ps http
 		return
 	}
 
-	//403 - you can't change the username of another user, username not changed
+	// 403 - you can't change the username of another user, username not changed
 	if token != user.IdUser {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusForbidden)
@@ -49,7 +49,7 @@ func (rt *_router) setMyUserName(w http.ResponseWriter, r *http.Request, ps http
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	//404 - user id not found, username not changed
+	// 404 - user id not found, username not changed
 	if count <= 0 {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusNotFound)
@@ -87,7 +87,7 @@ func (rt *_router) setMyUserName(w http.ResponseWriter, r *http.Request, ps http
 		return
 	}
 
-	//200 - username succesfully changed
+	// 200 - username succesfully changed
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(user)

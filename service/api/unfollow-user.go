@@ -22,7 +22,7 @@ func (rt *_router) unfollowUser(w http.ResponseWriter, r *http.Request, ps httpr
 		return
 	}
 
-	//401 - you must be logged in, not unfollowed
+	// 401 - you must be logged in, not unfollowed
 	if isNotLogged(token) {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
@@ -40,7 +40,7 @@ func (rt *_router) unfollowUser(w http.ResponseWriter, r *http.Request, ps httpr
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	//404 - user (follower) not found, not unfollowed
+	// 404 - user (follower) not found, not unfollowed
 	if count <= 0 {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusNotFound)
@@ -59,7 +59,7 @@ func (rt *_router) unfollowUser(w http.ResponseWriter, r *http.Request, ps httpr
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	//404 - user (to unfollow) not found, not unfollowed
+	// 404 - user (to unfollow) not found, not unfollowed
 	if count <= 0 {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusNotFound)
@@ -67,7 +67,7 @@ func (rt *_router) unfollowUser(w http.ResponseWriter, r *http.Request, ps httpr
 		return
 	}
 
-	//403 - you cannot unfollow an user for another user, not unfollowed
+	// 403 - you cannot unfollow an user for another user, not unfollowed
 	if token != user.IdUser {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusForbidden)
@@ -76,7 +76,7 @@ func (rt *_router) unfollowUser(w http.ResponseWriter, r *http.Request, ps httpr
 		return
 	}
 
-	//403 - you can't unfollow yourself, not unfollowed
+	// 403 - you can't unfollow yourself, not unfollowed
 	if user.IdUser == userToUnfollow.IdUser {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusForbidden)
@@ -93,7 +93,7 @@ func (rt *_router) unfollowUser(w http.ResponseWriter, r *http.Request, ps httpr
 		return
 	}
 
-	//403 - you can't unfollow a user you don't yet follow, not unfollowed
+	// 403 - you can't unfollow a user you don't yet follow, not unfollowed
 	if count <= 0 {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusForbidden)
@@ -115,7 +115,7 @@ func (rt *_router) unfollowUser(w http.ResponseWriter, r *http.Request, ps httpr
 		return
 	}
 
-	//200 - user succesfully unfollowed
+	// 200 - user succesfully unfollowed
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(userToUnfollow)
