@@ -47,7 +47,11 @@ func (rt *_router) followUser(w http.ResponseWriter, r *http.Request, ps httprou
 	if count <= 0 {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusNotFound)
-		json.NewEncoder(w).Encode(user.IdUser)
+		err = json.NewEncoder(w).Encode(user.IdUser)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 		return
 	}
 
@@ -66,7 +70,11 @@ func (rt *_router) followUser(w http.ResponseWriter, r *http.Request, ps httprou
 	if count <= 0 {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusNotFound)
-		json.NewEncoder(w).Encode(userToFollow.IdUser)
+		err = json.NewEncoder(w).Encode(userToFollow.IdUser)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 		return
 	}
 
@@ -74,9 +82,21 @@ func (rt *_router) followUser(w http.ResponseWriter, r *http.Request, ps httprou
 	if token != user.IdUser {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusForbidden)
-		json.NewEncoder(w).Encode(user.IdUser)
-		json.NewEncoder(w).Encode(userToFollow.IdUser)
-		json.NewEncoder(w).Encode(token)
+		err = json.NewEncoder(w).Encode(user.IdUser)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		err = json.NewEncoder(w).Encode(userToFollow.IdUser)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		err = json.NewEncoder(w).Encode(token)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 		return
 	}
 
@@ -84,9 +104,21 @@ func (rt *_router) followUser(w http.ResponseWriter, r *http.Request, ps httprou
 	if user.IdUser == userToFollow.IdUser {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusForbidden)
-		json.NewEncoder(w).Encode(user.IdUser)
-		json.NewEncoder(w).Encode(userToFollow.IdUser)
-		json.NewEncoder(w).Encode(token)
+		err = json.NewEncoder(w).Encode(user.IdUser)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		err = json.NewEncoder(w).Encode(userToFollow.IdUser)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		err = json.NewEncoder(w).Encode(token)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 		return
 	}
 
@@ -108,9 +140,21 @@ func (rt *_router) followUser(w http.ResponseWriter, r *http.Request, ps httprou
 	if count+count2 > 0 {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusForbidden)
-		json.NewEncoder(w).Encode(user.IdUser)
-		json.NewEncoder(w).Encode(userToFollow.IdUser)
-		json.NewEncoder(w).Encode(token)
+		err = json.NewEncoder(w).Encode(user.IdUser)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		err = json.NewEncoder(w).Encode(userToFollow.IdUser)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		err = json.NewEncoder(w).Encode(token)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 		return
 	}
 
@@ -129,6 +173,10 @@ func (rt *_router) followUser(w http.ResponseWriter, r *http.Request, ps httprou
 	// 200 - user succesfully followed
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(userToFollow)
+	err = json.NewEncoder(w).Encode(userToFollow)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 
 }

@@ -52,7 +52,11 @@ func (rt *_router) likePhoto(w http.ResponseWriter, r *http.Request, ps httprout
 	if count <= 0 {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusNotFound)
-		json.NewEncoder(w).Encode(like.IdLiker)
+		err = json.NewEncoder(w).Encode(like.IdLiker)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 		return
 	}
 
@@ -66,7 +70,11 @@ func (rt *_router) likePhoto(w http.ResponseWriter, r *http.Request, ps httprout
 	if count <= 0 {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusNotFound)
-		json.NewEncoder(w).Encode(like.IdOwner)
+		err = json.NewEncoder(w).Encode(like.IdOwner)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 		return
 	}
 
@@ -80,8 +88,16 @@ func (rt *_router) likePhoto(w http.ResponseWriter, r *http.Request, ps httprout
 	if count <= 0 {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusNotFound)
-		json.NewEncoder(w).Encode(like.IdImage)
-		json.NewEncoder(w).Encode(like.IdOwner)
+		err = json.NewEncoder(w).Encode(like.IdImage)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		err = json.NewEncoder(w).Encode(like.IdOwner)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 		return
 	}
 
@@ -95,7 +111,11 @@ func (rt *_router) likePhoto(w http.ResponseWriter, r *http.Request, ps httprout
 	if count > 0 {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusForbidden)
-		json.NewEncoder(w).Encode(like)
+		err = json.NewEncoder(w).Encode(like)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 		return
 	}
 
@@ -109,7 +129,11 @@ func (rt *_router) likePhoto(w http.ResponseWriter, r *http.Request, ps httprout
 	if count > 0 {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusForbidden)
-		json.NewEncoder(w).Encode(like)
+		err = json.NewEncoder(w).Encode(like)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 		return
 	}
 
@@ -123,7 +147,11 @@ func (rt *_router) likePhoto(w http.ResponseWriter, r *http.Request, ps httprout
 	if count > 0 {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusForbidden)
-		json.NewEncoder(w).Encode(like)
+		err = json.NewEncoder(w).Encode(like)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 		return
 	}
 
@@ -136,6 +164,10 @@ func (rt *_router) likePhoto(w http.ResponseWriter, r *http.Request, ps httprout
 	// 200 - photo succesfully liked
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(like)
+	err = json.NewEncoder(w).Encode(like)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 
 }

@@ -38,8 +38,16 @@ func (rt *_router) setMyUserName(w http.ResponseWriter, r *http.Request, ps http
 	if token != user.IdUser {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusForbidden)
-		json.NewEncoder(w).Encode(user.IdUser)
-		json.NewEncoder(w).Encode(token)
+		err = json.NewEncoder(w).Encode(user.IdUser)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		err = json.NewEncoder(w).Encode(token)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 		return
 	}
 
@@ -53,7 +61,11 @@ func (rt *_router) setMyUserName(w http.ResponseWriter, r *http.Request, ps http
 	if count <= 0 {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusNotFound)
-		json.NewEncoder(w).Encode(user.IdUser)
+		err = json.NewEncoder(w).Encode(user.IdUser)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 	}
 
 	err = json.NewDecoder(r.Body).Decode(&user)
@@ -71,7 +83,11 @@ func (rt *_router) setMyUserName(w http.ResponseWriter, r *http.Request, ps http
 	if count > 0 {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusConflict)
-		json.NewEncoder(w).Encode(user.Username)
+		err = json.NewEncoder(w).Encode(user.Username)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 		return
 	}
 
@@ -90,5 +106,9 @@ func (rt *_router) setMyUserName(w http.ResponseWriter, r *http.Request, ps http
 	// 200 - username succesfully changed
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(user)
+	err = json.NewEncoder(w).Encode(user)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 }

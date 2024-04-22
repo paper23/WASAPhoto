@@ -45,7 +45,11 @@ func (rt *_router) unbanUser(w http.ResponseWriter, r *http.Request, ps httprout
 	if count <= 0 {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusNotFound)
-		json.NewEncoder(w).Encode(user.IdUser)
+		err = json.NewEncoder(w).Encode(user.IdUser)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 		return
 	}
 
@@ -65,7 +69,11 @@ func (rt *_router) unbanUser(w http.ResponseWriter, r *http.Request, ps httprout
 	if count <= 0 {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusNotFound)
-		json.NewEncoder(w).Encode(userToSban.IdUser)
+		err = json.NewEncoder(w).Encode(userToSban.IdUser)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 		return
 	}
 
@@ -73,9 +81,21 @@ func (rt *_router) unbanUser(w http.ResponseWriter, r *http.Request, ps httprout
 	if token != user.IdUser {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusNotFound)
-		json.NewEncoder(w).Encode(user.IdUser)
-		json.NewEncoder(w).Encode(userToSban.IdUser)
-		json.NewEncoder(w).Encode(token)
+		err = json.NewEncoder(w).Encode(user.IdUser)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		err = json.NewEncoder(w).Encode(userToSban.IdUser)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		err = json.NewEncoder(w).Encode(token)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 		return
 	}
 
@@ -83,9 +103,21 @@ func (rt *_router) unbanUser(w http.ResponseWriter, r *http.Request, ps httprout
 	if user.IdUser == userToSban.IdUser {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusForbidden)
-		json.NewEncoder(w).Encode(user.IdUser)
-		json.NewEncoder(w).Encode(userToSban.IdUser)
-		json.NewEncoder(w).Encode(token)
+		err = json.NewEncoder(w).Encode(user.IdUser)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		err = json.NewEncoder(w).Encode(userToSban.IdUser)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		err = json.NewEncoder(w).Encode(token)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 		return
 	}
 
@@ -99,8 +131,16 @@ func (rt *_router) unbanUser(w http.ResponseWriter, r *http.Request, ps httprout
 	if count <= 0 {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusNotFound)
-		json.NewEncoder(w).Encode(user.IdUser)
-		json.NewEncoder(w).Encode(userToSban.IdUser)
+		err = json.NewEncoder(w).Encode(user.IdUser)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		err = json.NewEncoder(w).Encode(userToSban.IdUser)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 		return
 	}
 
@@ -119,6 +159,10 @@ func (rt *_router) unbanUser(w http.ResponseWriter, r *http.Request, ps httprout
 	// 200 - user sbanned succesfully
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(userToSban)
+	err = json.NewEncoder(w).Encode(userToSban)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 
 }
