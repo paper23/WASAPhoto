@@ -52,6 +52,8 @@ type AppDatabase interface {
 	CheckFollowing(idUser int, idUserToUnfollow int) (error, int)
 	UnfollowUser(idUser int, idUserToUnfolow int) error
 	FindUserBio(idUser int) (error, string)
+	CountFollowing(idUser int) (error, int)
+	CountFollowers(idUser int) (error, int)
 
 	//image
 	InsertPhoto(idOwner int, date string, url string) (error, int)
@@ -68,6 +70,7 @@ type AppDatabase interface {
 	CheckLike(idLiker int, idImage int) (error, int)
 	UnlikePhoto(idLiker int, idImage int) error
 	CheckPhotoOwnership(idImage int, idOwner int) (error, int)
+	GetUserImages(idOwner int) (error, []int)
 
 	Ping() error
 }

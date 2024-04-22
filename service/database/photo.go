@@ -1,5 +1,7 @@
 package database
 
+import "database/sql"
+
 // insert a new photo given its id, its owner id and the date of upload
 func (db *appdbimpl) InsertPhoto(idOwner int, date string, url string) (error, int) {
 	res, err := db.c.Exec(`INSERT INTO images (idOwner, dateTime, url) VALUES (?, ?, ?)`, idOwner, date, url)
@@ -66,5 +68,31 @@ func (db *appdbimpl) CheckPhotoOwnership(idImage int, idOwner int) (error, int) 
 	}
 
 	return err, count
+
+}
+
+func (db *appdbimpl) GetUserImages(idOwner int) (error, []int) {
+
+	var idImages []int
+	var rows *sql.Rows
+	var err error
+
+	query := "`SELECT idImage FROM images WHERE idOwner = ?`"
+	rows, err = db.c.Query(query, idOwner)
+
+	if err != nil {
+		return err, nil
+	}
+
+	for rows.Next() {
+		var idImage int
+		err = rows.Scan(&idImage)
+		if err != nil {
+			return err, nil
+		}
+		idImages = append(idImages, idImage)
+	}
+
+	return err, idImages
 
 }

@@ -31,3 +31,10 @@ type Liking struct {
 	IdOwner int `json:"idOwner"`
 	IdLiker int `json:"idComment"`
 }
+
+type UserProfile struct {
+	IdUser        int   `json:"idUser"`
+	FollowCount   int   `json:"followCount"`
+	FollowerCount int   `json:"followerCount"`
+	Images        []int `json:"idImage"`
+}

@@ -143,3 +143,25 @@ func (db *appdbimpl) FindUserBio(idUser int) (error, string) {
 
 	return err, bio
 }
+
+func (db *appdbimpl) CountFollowing(idUser int) (error, int) {
+	var count int
+	err := db.c.QueryRow(`SELECT COUNT(*) FROM follows WHERE idFollower = ?`, idUser).Scan(&count)
+
+	if err != nil {
+		return err, -1
+	}
+
+	return err, count
+}
+
+func (db *appdbimpl) CountFollowers(idUser int) (error, int) {
+	var count int
+	err := db.c.QueryRow(`SELECT COUNT(*) FROM follows WHERE idFollowed = ?`, idUser).Scan(&count)
+
+	if err != nil {
+		return err, -1
+	}
+
+	return err, count
+}
