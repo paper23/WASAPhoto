@@ -1024,3 +1024,25 @@ paths:
                 maxItems: 100
                 items:
                   $ref: "#/components/schemas/Image"
+        "401":
+          description: you must be logged in
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    description: error type
+                    type: string
+                    example: you must be logged in to see you stream
+        "403":
+          description: you cant' see another user's stream
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    description: error type
+                    type: string
+                    example: you can't see antoher user's stream, forbidden

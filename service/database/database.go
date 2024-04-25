@@ -38,7 +38,7 @@ import (
 
 // AppDatabase is the high level interface for the DB
 type AppDatabase interface {
-	//user
+	// user
 	DoLogin(username string) error
 	FindUserId(username string) (error, int)
 	CheckUsername(username string) (error, int)
@@ -56,7 +56,7 @@ type AppDatabase interface {
 	CountFollowing(idUser int) (error, int)
 	CountFollowers(idUser int) (error, int)
 
-	//image
+	// image
 	InsertPhoto(idOwner int, date string, url string) (error, int)
 	SelectImgUrl(idImage int) (error, string)
 	SelectImgDate(idImage int) (error, string)
@@ -72,6 +72,9 @@ type AppDatabase interface {
 	UnlikePhoto(idLiker int, idImage int) error
 	CheckPhotoOwnership(idImage int, idOwner int) (error, int)
 	GetUserImages(idOwner int) (error, []int)
+
+	// stream
+	GetStream(idUser int) (error, []int, []int, []string)
 
 	Ping() error
 }

@@ -38,3 +38,9 @@ type UserProfile struct {
 	FollowerCount int   `json:"followerCount"`
 	Images        []int `json:"idImage"`
 }
+
+type Stream struct {
+	IdUser   []int    `json:"idUser"`
+	Username []string `json:"username"`
+	IdImage  []int    `json:"idImage"`
+}
