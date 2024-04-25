@@ -93,6 +93,12 @@ func (db *appdbimpl) GetUserImages(idOwner int) (error, []int) {
 		idImages = append(idImages, idImage)
 	}
 
+	err = rows.Err()
+
+	if err != nil {
+		return err, nil
+	}
+
 	return err, idImages
 
 }

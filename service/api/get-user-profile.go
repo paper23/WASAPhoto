@@ -1,7 +1,7 @@
 package api
 
 import (
-	//"encoding/json"
+	"encoding/json"
 	"net/http"
 	"strconv"
 
@@ -31,31 +31,104 @@ func (rt *_router) getUserProfile(w http.ResponseWriter, r *http.Request, ps htt
 		return
 	}
 
-	profile.IdUser, err = strconv.Atoi(ps.ByName("idUser"))
+	profile.User.IdUser, err = strconv.Atoi(ps.ByName("idUser"))
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	err, profile.FollowCount = rt.db.CountFollowing(profile.IdUser)
+	var count int
+	err, count = rt.db.FindUserById(profile.User.IdUser)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	err, profile.FollowerCount = rt.db.CountFollowers(profile.IdUser)
+	// 404 - user not found
+	if count <= 0 {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusNotFound)
+		err = json.NewEncoder(w).Encode(profile.User.IdUser)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		return
+	}
+
+	err, count = rt.db.CheckBan(token, profile.User.IdUser)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	err, profile.Images = rt.db.GetUserImages(profile.IdUser)
+	// 403 - you cannot see the profile of a user who has banned you
+	if count > 0 {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusForbidden)
+		err = json.NewEncoder(w).Encode(profile.User.IdUser)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		return
+	}
+
+	err, count = rt.db.CheckBan(profile.User.IdUser, token)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	// ho recuperato dal DB tutte le informazioni che mi servono
-	// ora devo fare tutti i possibili errori come riportano le API
+	// 403 - you cannot see the profile of a user you banned
+	if count > 0 {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusForbidden)
+		err = json.NewEncoder(w).Encode(profile.User.IdUser)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		return
+	}
+
+	err, profile.FollowCount = rt.db.CountFollowing(profile.User.IdUser)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	err, profile.FollowerCount = rt.db.CountFollowers(profile.User.IdUser)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	err, profile.Images = rt.db.GetUserImages(profile.User.IdUser)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	err, profile.User.Biography = rt.db.FindUserBio(profile.User.IdUser)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	err, profile.User.Username = rt.db.FindUsername(profile.User.IdUser)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	// 200 - profile succesfully showed
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	err = json.NewEncoder(w).Encode(profile)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 
 }

@@ -33,7 +33,7 @@ type Liking struct {
 }
 
 type UserProfile struct {
-	IdUser        int   `json:"idUser"`
+	User          User  `json:"user"`
 	FollowCount   int   `json:"followCount"`
 	FollowerCount int   `json:"followerCount"`
 	Images        []int `json:"idImage"`

@@ -363,9 +363,8 @@ paths:
                   text:
                     description: the text of the comment
                     type: string
-                    example: beautiful picture!
-                  
-  
+                    example: beautiful picture!                  
+
   /users/{idUser}/images/{idImage}/comments/{idComment}:
     #uncommentPhoto
     delete:
@@ -744,6 +743,17 @@ paths:
                     description: error type
                     type: string
                     example: authentication is required, please log in into your account
+        "403":
+          description: you cannot see the profile of a user who has banned you/you banned
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  idUser:
+                    description: the identifier of the user
+                    type: integer
+                    example: 1
         "404":
           description: user not found
           content:
