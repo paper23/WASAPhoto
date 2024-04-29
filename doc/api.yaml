@@ -31,13 +31,13 @@ components:
             minLength: 3
             maxLength: 16
             pattern: 'ˆ.+?$'
-            example: lorenzo23
+            example: 'lorenzo23'
           biography:
             description: small text describing the user
             type: string
             minLength: 1
             maxLength: 100
-            pattern: 'ˆ.*$'
+            pattern: "ˆ.*$"
             example: "Hi, I'm 21, I live in Rome"
           
       Image:
@@ -60,7 +60,7 @@ components:
             type: string
             format: date-time
             pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z[-+]\d{2}:\d{2}$'
-            example: "2023-11-25T15:30:00Z+03:00"
+            example: '2023-11-25T15:30:00Z+03:00'
             minLength: 20
             maxLength: 29
             readOnly: true
@@ -70,7 +70,7 @@ components:
             pattern: '^/img/[a-z]+[0-9]+$'
             minLength: 3
             maxLength: 100
-            example: "/img/photo123.jpg"
+            example: '/img/photo123.jpg'
             #readOnly: true
             
       Like:
@@ -128,8 +128,6 @@ tags:
 - name: comment
 - name: ban
 - name: like
-
-#GLI UTENTI DEVONO ESSERE PER FORZA LOGGATI, GESTIRE GLI ERRORI
   
 paths:
   /session:
@@ -147,12 +145,13 @@ paths:
         content:
           application/json:
             schema:
+              description: insert your username
               type: object
               properties:
                 name:
                   description: username
                   type: string
-                  example: Maria
+                  example: 'Maria'
                   pattern: 'ˆ.+?$'
                   minLength: 3
                   maxLength: 16
@@ -163,6 +162,7 @@ paths:
           content:
             application/json:
               schema:
+                description: returns userId
                 type: object
                 properties:
                   identifier:
@@ -205,6 +205,7 @@ paths:
           content:
             application/json:
               schema:
+                description: returns userId and an error string
                 type: object
                 properties:
                   idOwner:
@@ -220,6 +221,7 @@ paths:
           content:
             application/json:
               schema:
+                description: returns the userId and the token (bearer)
                 type: object
                 properties:
                   idOwner:
@@ -267,6 +269,7 @@ paths:
           content:
             application/json:
               schema:
+                description: returns an error string
                 type: object
                 properties:
                   error:
@@ -278,6 +281,7 @@ paths:
           content:
             application/json:
               schema:
+                description: returns the idOwner, the idImage and an error string
                 type: object
                 properties:
                   idOwner:
@@ -331,6 +335,7 @@ paths:
           content:
             application/json:
               schema:
+                description: returns the idUser, the idImage and an error string
                 type: object
                 properties:
                   idUser:
@@ -350,6 +355,7 @@ paths:
           content:
             application/json:
               schema:
+                description: returns the idUser, the idImage and an error string
                 type: object
                 properties:
                   idUser:
@@ -405,6 +411,7 @@ paths:
           content:
             application/json:
               schema:
+                description: returns the idComment and an error string
                 type: object
                 properties:
                   idComment:
@@ -438,6 +445,7 @@ paths:
         content:
           application/json:
             schema:
+              description: requests the id of the user to ban
               type: object
               properties:
                 idUserToBan:
@@ -455,6 +463,7 @@ paths:
           content:
             application/json:
               schema:
+                description: returns the idUser, the idUserToBan and the token
                 type: object
                 properties:
                   idUser:
@@ -474,6 +483,7 @@ paths:
           content:
             application/json:
               schema:
+                description: returns the idUser and the idUserToBan
                 type: object
                 properties:
                   idUser:
@@ -525,6 +535,7 @@ paths:
           content:
             application/json:
               schema:
+                description: returns the idUser, the idUserToBan and the token
                 type: object
                 properties:
                   idUser:
@@ -544,6 +555,7 @@ paths:
           content:
             application/json:
               schema:
+                description: returns the idUser and the idUserToBan
                 type: object
                 properties:
                   idUser:
@@ -583,6 +595,7 @@ paths:
         content:
           application/json:
             schema:
+              description: requests the idImageLiked
               type: object
               properties:
                 idImageLiked:
@@ -600,6 +613,7 @@ paths:
           content:
             application/json:
               schema:
+                description: returns the idUser and the idImage
                 type: object
                 properties:
                   idUser:
@@ -616,6 +630,7 @@ paths:
           content:
             application/json:
               schema:
+                description: returns the idImage, the idLiker and the idOwner
                 type: object
                 properties:
                   idImage:
@@ -673,6 +688,7 @@ paths:
           content:
             application/json:
               schema:
+                description: returns an error string
                 type: object
                 properties:
                   error:
@@ -684,6 +700,7 @@ paths:
           content:
             application/json:
               schema:
+                description: returns the idLike and an error string
                 type: object
                 properties:
                   idLike:
@@ -737,6 +754,7 @@ paths:
           content:
             application/json:
               schema:
+                description: returns an error string
                 type: object
                 properties:
                   error:
@@ -748,6 +766,7 @@ paths:
           content:
             application/json:
               schema:
+                description: return the idUser
                 type: object
                 properties:
                   idUser:
@@ -759,6 +778,7 @@ paths:
           content:
             application/json:
               schema:
+                description: returns the idUser and an error string
                 type: object
                 properties:
                   idUser:
@@ -799,7 +819,7 @@ paths:
                   pattern: 'ˆ.+?$'
                   minLength: 3
                   maxLength: 16
-                  example: username2
+                  example: 'username2'
       responses:
         "200":
           description: username successfully changed
@@ -811,6 +831,7 @@ paths:
           content:
             application/json:
               schema:
+                description: returns the idUser and an error string
                 type: object
                 properties:
                   idUser:
@@ -826,6 +847,7 @@ paths:
           content:
             application/json:
               schema:
+                description: returns the username
                 type: object
                 properties:
                   username:
@@ -837,6 +859,7 @@ paths:
           content:
             application/json:
               schema:
+                description: returns the idUser and the token
                 type: object
                 properties:
                   idUser:
@@ -872,6 +895,7 @@ paths:
         content:
           application/json:
             schema:
+              description: requests the idUserToFollow
               type: object
               properties:
                 idUserToFollow:
@@ -889,6 +913,7 @@ paths:
           content:
             application/json:
               schema:
+                description: returns the idUser, the idUserToFollow and an error string
                 type: object
                 properties:
                   idUser:
@@ -908,6 +933,7 @@ paths:
           content:
             application/json:
               schema:
+                description: returns the idUser, the idUserToFollow and the token (bearer)
                 type: object
                 properties:
                   idUser:
@@ -960,6 +986,7 @@ paths:
           content:
             application/json:
               schema:
+                description: returns the idUser, the idUserToUnfollow and the token (bearer)
                 type: object
                 properties:
                   idUser:
@@ -979,6 +1006,7 @@ paths:
           content:
             application/json:
               schema:
+                description: returns the idUser, the idUserToUnfollow and an error string
                 type: object
                 properties:
                   idUser:
@@ -1029,6 +1057,7 @@ paths:
           content:
             application/json:
               schema:
+                description: returns an error string
                 type: object
                 properties:
                   error:
@@ -1040,9 +1069,26 @@ paths:
           content:
             application/json:
               schema:
+                description: returns an error string
                 type: object
                 properties:
                   error:
                     description: error type
                     type: string
                     example: you can't see antoher user's stream, forbidden
+        "404":
+          description: user not found
+          content:
+            application/json:
+              schema:
+                description: returns the idUser and an error string
+                type: object
+                properties:
+                  idUser:
+                    description: the identifier of the user
+                    type: integer
+                    example: 1
+                  error:
+                    description: error type
+                    type: string
+                    example: user/user id not found
