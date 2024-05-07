@@ -9,7 +9,7 @@ func (rt *_router) Handler() http.Handler {
 	// Register routes
 
 	// login
-	rt.router.POST("/session", rt.login)
+	rt.router.POST("/session", rt.doLogin)
 
 	// user
 	rt.router.PUT("/users/:idUser", rt.setMyUserName)
