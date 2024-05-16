@@ -18,7 +18,8 @@ export default {
             } else {
                 try {
                     let response = await this.$axios.post("/session", {username: this.username});
-                    this.profile = response.data;
+                    this.profile.username = this.username;
+                    this.profile.id = response.data
                     localStorage.setItem("token", this.profile.id);
                     localStorage.setItem("username", this.profile.username);
                     this.$router.push({ path: '/session' });
