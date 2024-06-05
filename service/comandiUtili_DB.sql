@@ -21,3 +21,5 @@ LIMIT 100;
 SELECT COUNT(*) FROM follows WHERE idFollower = 3;
 
 SELECT file from images WHERE idImage IN (1,2,3,4)
+
+DELETE FROM images WHERE idImage = 2

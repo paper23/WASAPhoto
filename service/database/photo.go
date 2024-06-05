@@ -60,13 +60,13 @@ func (db *appdbimpl) CheckPhotoOwnership(idImage int, idOwner int) (error, int) 
 
 }
 
-func (db *appdbimpl) GetUserImagesId(idOwner int) (error, []int) {
+func (db *appdbimpl) GetUserImages(idOwner int) (error, []Image) {
 
-	var idImages []int
+	var images []Image
 	var rows *sql.Rows
 	var err error
 
-	query := "SELECT idImage FROM images WHERE idOwner = ?"
+	query := "SELECT * FROM images WHERE idOwner = ?"
 	rows, err = db.c.Query(query, idOwner)
 
 	if err != nil {
@@ -74,12 +74,12 @@ func (db *appdbimpl) GetUserImagesId(idOwner int) (error, []int) {
 	}
 
 	for rows.Next() {
-		var idImage int
-		err = rows.Scan(&idImage)
+		var image Image
+		err = rows.Scan(&image.IdImage, &image.IdOwner, &image.DateTime, &image.File)
 		if err != nil {
 			return err, nil
 		}
-		idImages = append(idImages, idImage)
+		images = append(images, image)
 	}
 
 	err = rows.Err()
@@ -88,24 +88,6 @@ func (db *appdbimpl) GetUserImagesId(idOwner int) (error, []int) {
 		return err, nil
 	}
 
-	return err, idImages
-
-}
-
-func (db *appdbimpl) GetUserImagesFile(idImages []int) (error, []byte) {
-	var imageFiles []byte
-	var err error
-	var file []byte
-
-	for _, value := range idImages {
-		err = db.c.QueryRow(`SELECT file FROM images WHERE idImage = ?`, value).Scan(&file)
-		if err != nil {
-			return err, nil
-		}
-
-		imageFiles = append(imageFiles, file...)
-	}
-
-	return nil, imageFiles
+	return err, images
 
 }

@@ -70,8 +70,7 @@ type AppDatabase interface {
 	CheckLike(idLiker int, idImage int) (error, int)
 	UnlikePhoto(idLiker int, idImage int) error
 	CheckPhotoOwnership(idImage int, idOwner int) (error, int)
-	GetUserImagesId(idOwner int) (error, []int)
-	GetUserImagesFile(idImages []int) (error, []byte)
+	GetUserImages(idOwner int) (error, []Image)
 
 	// stream
 	GetStream(idUser int) (error, []int, []int, []string)

@@ -1,5 +1,7 @@
 package api
 
+import "git.sapienzaapps.it/fantasticcoffee/fantastic-coffee-decaffeinated/service/database"
+
 type User struct {
 	IdUser    int    `json:"idUser"`
 	Username  string `json:"username"`
@@ -33,11 +35,10 @@ type Liking struct {
 }
 
 type UserProfile struct {
-	User          User   `json:"user"`
-	FollowCount   int    `json:"followCount"`
-	FollowerCount int    `json:"followerCount"`
-	Images        []int  `json:"idImage"`
-	ImgFiles      []byte `json:"imgFile"`
+	User          User             `json:"user"`
+	FollowCount   int              `json:"followCount"`
+	FollowerCount int              `json:"followerCount"`
+	Image         []database.Image `json:"images"`
 }
 
 type Stream struct {

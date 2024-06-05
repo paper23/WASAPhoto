@@ -13,12 +13,10 @@ export default {
 				followingCount: 0,
 				images: [
 					{
-						idImage: 0
-					}
-				],
-				imgFiles: [
-					{
-						imgFile: 0
+						idImage: 0,
+						idOwner: 0,
+						dateTime: null,
+						file: null,
 					}
 				],
 			},
@@ -44,10 +42,11 @@ export default {
 						}})
 				this.profile.followersCount = response.data.followerCount
 				this.profile.followingCount = response.data.followCount
-				this.profile.images = response.data.idImage
-				this.profile.imgFiles = response.data.imgFile
-
-				this.profile.imgFiles[0] = 'data:image/*;base64,' + this.profile.imgFiles[0]
+				this.profile.images = response.data.images
+				
+				for (let i = 0; i < this.profile.images.length; i++) {
+					this.profile.images[i].file = 'data:image/*;base64,' + this.profile.images[i].file
+				}
 			}
 			catch(e) {
 				this.errormsg = e.toString();
@@ -102,10 +101,10 @@ export default {
 			</div>
 		</div>
 		<div class="row">
-			<div class="col-md-4" v-for="image in this.profile.imgFiles" :key="image.imgFile">
-				<!--{{ image }}-->
+			<div class="col-md-4" v-for="image in this.profile.images" :key="image.file">
+				<!-- {{ image }} -->
 				<div class="card mb-4 shadow-sm">
-                	<img class="card-img-top" :src=image alt="Card image cap">
+                	<img class="card-img-top" :src=image.file alt="Card image cap">
 				</div>
 			</div>
 		</div>
