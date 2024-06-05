@@ -57,8 +57,7 @@ type AppDatabase interface {
 	CountFollowers(idUser int) (error, int)
 
 	// image
-	InsertPhoto(idOwner int, date string, url string) (error, int)
-	SelectImgUrl(idImage int) (error, string)
+	InsertPhoto(idOwner int, date string, file []byte) (error, int)
 	SelectImgDate(idImage int) (error, string)
 	FindImage(idImage int, idOwner int) (error, int)
 	DeleteImage(idImage int, idOwner int) error
@@ -71,7 +70,8 @@ type AppDatabase interface {
 	CheckLike(idLiker int, idImage int) (error, int)
 	UnlikePhoto(idLiker int, idImage int) error
 	CheckPhotoOwnership(idImage int, idOwner int) (error, int)
-	GetUserImages(idOwner int) (error, []int)
+	GetUserImagesId(idOwner int) (error, []int)
+	GetUserImagesFile(idImages []int) (error, []byte)
 
 	// stream
 	GetStream(idUser int) (error, []int, []int, []string)
@@ -125,7 +125,7 @@ func createDatabase(db *sql.DB) error {
 			idImage INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
 			idOwner INTEGER NOT NULL,
 			dateTime DATETIME NOT NULL,
-			url VARCHAR(100) NOT NULL,
+			file BLOB NOT NULL,
 			FOREIGN KEY(idOwner) REFERENCES users (idUser) ON DELETE CASCADE
 		);`,
 		`CREATE TABLE IF NOT EXISTS likes (

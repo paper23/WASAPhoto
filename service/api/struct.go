@@ -10,7 +10,7 @@ type Image struct {
 	IdImage  int    `json:"idImage"`
 	IdOwner  int    `json:"idOwner"`
 	DateTime string `json:"dateTime"`
-	Url      string `json:"url"`
+	File     []byte `json:"file"`
 }
 
 type DoubleIdUser struct {
@@ -33,10 +33,11 @@ type Liking struct {
 }
 
 type UserProfile struct {
-	User          User  `json:"user"`
-	FollowCount   int   `json:"followCount"`
-	FollowerCount int   `json:"followerCount"`
-	Images        []int `json:"idImage"`
+	User          User   `json:"user"`
+	FollowCount   int    `json:"followCount"`
+	FollowerCount int    `json:"followerCount"`
+	Images        []int  `json:"idImage"`
+	ImgFiles      []byte `json:"imgFile"`
 }
 
 type Stream struct {

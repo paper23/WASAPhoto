@@ -3,8 +3,8 @@ package database
 import "database/sql"
 
 // insert a new photo given its id, its owner id and the date of upload
-func (db *appdbimpl) InsertPhoto(idOwner int, date string, url string) (error, int) {
-	res, err := db.c.Exec(`INSERT INTO images (idOwner, dateTime, url) VALUES (?, ?, ?)`, idOwner, date, url)
+func (db *appdbimpl) InsertPhoto(idOwner int, date string, file []byte) (error, int) {
+	res, err := db.c.Exec(`INSERT INTO images (idOwner, dateTime, file) VALUES (?, ?, ?)`, idOwner, date, file)
 
 	if err != nil {
 		return err, -1
@@ -17,17 +17,6 @@ func (db *appdbimpl) InsertPhoto(idOwner int, date string, url string) (error, i
 	}
 
 	return err, int(idImage)
-}
-
-func (db *appdbimpl) SelectImgUrl(idImage int) (error, string) {
-	var url string
-	err := db.c.QueryRow(`SELECT url FROM images WHERE idImage = ?`, idImage).Scan(&url)
-
-	if err != nil {
-		return err, ""
-	}
-
-	return nil, url
 }
 
 func (db *appdbimpl) SelectImgDate(idImage int) (error, string) {
@@ -71,13 +60,13 @@ func (db *appdbimpl) CheckPhotoOwnership(idImage int, idOwner int) (error, int) 
 
 }
 
-func (db *appdbimpl) GetUserImages(idOwner int) (error, []int) {
+func (db *appdbimpl) GetUserImagesId(idOwner int) (error, []int) {
 
 	var idImages []int
 	var rows *sql.Rows
 	var err error
 
-	query := "`SELECT idImage FROM images WHERE idOwner = ?`"
+	query := "SELECT idImage FROM images WHERE idOwner = ?"
 	rows, err = db.c.Query(query, idOwner)
 
 	if err != nil {
@@ -100,5 +89,23 @@ func (db *appdbimpl) GetUserImages(idOwner int) (error, []int) {
 	}
 
 	return err, idImages
+
+}
+
+func (db *appdbimpl) GetUserImagesFile(idImages []int) (error, []byte) {
+	var imageFiles []byte
+	var err error
+	var file []byte
+
+	for _, value := range idImages {
+		err = db.c.QueryRow(`SELECT file FROM images WHERE idImage = ?`, value).Scan(&file)
+		if err != nil {
+			return err, nil
+		}
+
+		imageFiles = append(imageFiles, file...)
+	}
+
+	return nil, imageFiles
 
 }

@@ -64,13 +64,10 @@ components:
             minLength: 20
             maxLength: 29
             readOnly: true
-          url:
-            description: the location of the image on the server
+          file:
+            description: the image file
             type: string
-            pattern: '^/img/[a-z]+[0-9]+$'
-            minLength: 3
-            maxLength: 100
-            example: '/img/photo123.jpg'
+            format: binary
             #readOnly: true
             
       Like:
@@ -181,7 +178,7 @@ paths:
       operationId: uploadPhoto
       summary: upload new photo
       description: |
-        upload a new photo using data provided in the body of the request and the id of the owner of the photo, return the full image object with the ID, URL and date/time
+        upload a new photo using data provided in the body of the request and the id of the owner of the photo, return the full image object with the ID, img file and date/time
       parameters:
       - name: idUser
         in: path
@@ -192,13 +189,13 @@ paths:
       requestBody:
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema: { $ref: "#/components/schemas/Image" }
       responses:
         "201":
           description: photo succesfully uploaded
           content:
-            application/json:
+            multipart/form-data:
               schema: { $ref: "#/components/schemas/Image" }
         "404":
           description: user not found, photo not uploaded
@@ -261,9 +258,6 @@ paths:
       responses:
         "200":
           description: photo succesfully deleted
-          content:
-            application/json:
-              schema: { $ref: "#/components/schemas/Image" }
         "401":
           description: unauthorized, only the owner can delete a photo, photo not deleted
           content:
@@ -951,7 +945,7 @@ paths:
         "401":
           description: you must be logged in, not followed
   
-  /user/{idUser}/follows/{idUserToUnfollow}:
+  /users/{idUser}/follows/{idUserToUnfollow}:
     #unfollowUser
     delete:
       security:
@@ -1024,7 +1018,7 @@ paths:
         "401":
           description: you must be logged in, not unfollowed
 
-  /user/{idUser}/stream:
+  /users/{idUser}/stream:
     #getMyStream
     get:
       security:

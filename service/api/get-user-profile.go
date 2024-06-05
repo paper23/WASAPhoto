@@ -104,11 +104,18 @@ func (rt *_router) getUserProfile(w http.ResponseWriter, r *http.Request, ps htt
 		return
 	}
 
-	err, profile.Images = rt.db.GetUserImages(profile.User.IdUser)
+	err, profile.Images = rt.db.GetUserImagesId(profile.User.IdUser)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
+
+	err, profile.ImgFiles = rt.db.GetUserImagesFile(profile.Images)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	print(profile.ImgFiles)
 
 	err, profile.User.Biography = rt.db.FindUserBio(profile.User.IdUser)
 	if err != nil {

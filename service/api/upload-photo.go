@@ -1,7 +1,9 @@
 package api
 
 import (
+	"bytes"
 	"encoding/json"
+	"io"
 	"net/http"
 	"strconv"
 	"time"
@@ -12,7 +14,7 @@ import (
 /*
 upload a new photo using data provided in the body of the request and
 the id of the owner of the photo, return the full image object with the ID,
-URL and date/time
+image file and date/time
 */
 func (rt *_router) uploadPhoto(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
@@ -73,16 +75,40 @@ func (rt *_router) uploadPhoto(w http.ResponseWriter, r *http.Request, ps httpro
 		return
 	}
 
-	err = json.NewDecoder(r.Body).Decode(&img)
+	err = r.ParseMultipartForm(10 << 20) //MAX 10MB
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+
+	file, handler, err := r.FormFile("file")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	defer file.Close()
+
+	var buf bytes.Buffer
+	_, err = io.Copy(&buf, file)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	img.File = buf.Bytes()
+	print(handler.Filename) //TROVARE UNA SOLUZIONE PER NON USARE QUESTO
+
+	/*err = json.NewDecoder(r.Body).Decode(&img)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		print("CIAO")
+		return
+	}*/
 
 	layout := "2006-01-02T15:04:05Z07:00"
 	img.DateTime = time.Now().Format(layout)
 
-	err, img.IdImage = rt.db.InsertPhoto(img.IdOwner, img.DateTime, img.Url)
+	err, img.IdImage = rt.db.InsertPhoto(img.IdOwner, img.DateTime, img.File)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return

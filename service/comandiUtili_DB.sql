@@ -17,3 +17,7 @@ JOIN follows ON users.idUser = follows.idFollowed
 WHERE follows.idFollower = 1
 ORDER BY images.dateTime DESC
 LIMIT 100;
+
+SELECT COUNT(*) FROM follows WHERE idFollower = 3;
+
+SELECT file from images WHERE idImage IN (1,2,3,4)

@@ -8,6 +8,25 @@ export default {
 		}
 	},
 	methods: {
+		async doLogout() {
+			try {
+				localStorage.removeItem("token")
+				localStorage.removeItem("username")
+				this.$router.push({ path: '/' });
+			}
+			catch(e) {
+				this.errormsg = e.toString();
+			}
+		},
+
+		async viewProfile() {
+			try {
+				this.$router.push({path: 'users/' + this.token})
+			}
+			catch(e) {
+				this.errormsg = e.toString();
+			}
+		},
 		
 	},
 	mounted() {
@@ -36,13 +55,12 @@ export default {
 				</ul>
 			</div>
 		</nav>
-		<div
-			class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+		<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
 			<h1 class="h2">Welcome back {{this.username }}</h1>
 			<div class="btn-toolbar mb-2 mb-md-0">
 				<div class="btn-group me-2">
 					<button class="btn btn-danger" type="button" @click="doLogout">Logout</button>
-					<button class="btn btn-primary" type="button" @click="ViewProfile">Profile</button>
+					<button class="btn btn-primary" type="button" @click="viewProfile">Profile</button>
 					<input type="file" accept="image/*" class="btn btn-outline-primary" @change="uploadFile" ref="file">
 					<button class="btn btn-success" @click="submitFile">Upload</button>
 				</div>
