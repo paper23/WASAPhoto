@@ -66,7 +66,7 @@ func (db *appdbimpl) GetUserImages(idOwner int) (error, []Image) {
 	var rows *sql.Rows
 	var err error
 
-	query := "SELECT * FROM images WHERE idOwner = ?"
+	query := "SELECT * FROM images WHERE idOwner = ? ORDER BY dateTime DESC"
 	rows, err = db.c.Query(query, idOwner)
 
 	if err != nil {

@@ -9,10 +9,13 @@ type User struct {
 }
 
 type Image struct {
-	IdImage  int    `json:"idImage"`
-	IdOwner  int    `json:"idOwner"`
-	DateTime string `json:"dateTime"`
-	File     []byte `json:"file"`
+	IdImage       int    `json:"idImage"`
+	IdOwner       int    `json:"idOwner"`
+	DateTime      string `json:"dateTime"`
+	File          []byte `json:"file"`
+	LikesCount    int    `json:"likesCount"`
+	CommentsCount int    `json:"commentsCount"`
+	LikeStatus    bool   `json:"likeStatus"`
 }
 
 type DoubleIdUser struct {

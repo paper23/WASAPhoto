@@ -642,7 +642,7 @@ paths:
         "401":
           description: you must be logged in, not liked
   
-  /users/{idUser}/images/{idImage}/likes/{idLike}:
+  /users/{idUser}/images/{idImage}/likes/{idLiker}:
     #unlikePhoto
     delete:
       security:
@@ -665,7 +665,7 @@ paths:
         schema:
           type: integer
         required: true
-      - name: idLike
+      - name: idLiker
         in: path
         description: the identifier of the like
         schema:

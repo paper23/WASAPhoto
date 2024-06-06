@@ -17,8 +17,12 @@ export default {
 						idOwner: 0,
 						dateTime: null,
 						file: null,
+						likesCount: 0,
+						commentsCount: 0,
+						likeStatus: null,
 					}
 				],
+				photoCount: 0,
 			},
 		}
 	},
@@ -47,11 +51,60 @@ export default {
 				for (let i = 0; i < this.profile.images.length; i++) {
 					this.profile.images[i].file = 'data:image/*;base64,' + this.profile.images[i].file
 				}
+
+				this.profile.photoCount = this.profile.images.length
 			}
 			catch(e) {
 				this.errormsg = e.toString();
 			}
         },
+		
+		async toggleLike(idImage, likeStatus) {
+			if (likeStatus) {
+				this.unlikePhoto(idImage)
+			}
+			else {
+				this.likePhoto(idImage)
+			}
+		},
+
+		async likePhoto(idImage) {
+			try {
+            	let response = await this.$axios.post("/users/" + this.profile.idUser + "/images/" + idImage + "/likes/", {}, {
+						headers: {
+							Authorization: "Bearer " + localStorage.getItem("token")
+						}})
+				
+				for (let i = 0; i < this.profile.images.length; i++) {
+					if (this.profile.images[i].idImage = idImage) {
+						this.profile.images[i].likeStatus = !this.profile.images[i].likeStatus
+						break;
+					}
+				}
+			}
+			catch(e) {
+				this.errormsg = e.toString();
+			}
+		},
+
+		async unlikePhoto(idImage) {
+			try {
+            	let response = await this.$axios.delete("/users/" + this.profile.idUser + "/images/" + idImage + "/likes/" + this.token, {
+						headers: {
+							Authorization: "Bearer " + localStorage.getItem("token")
+						}})
+				
+				for (let i = 0; i < this.profile.images.length; i++) {
+					if (this.profile.images[i].idImage = idImage) {
+						this.profile.images[i].likeStatus = !this.profile.images[i].likeStatus
+						break;
+					}
+				}
+			}
+			catch(e) {
+				this.errormsg = e.toString();
+			}
+		},
 		
 	},
 	mounted() {
@@ -80,9 +133,17 @@ export default {
 					<li class="nav-item">
 						<RouterLink :to="'/users/' + profile.idUser + '/images/'" class="nav-link">
 							<svg class="feather">
-								<use href="/feather-sprite-v4.29.0.svg#home" />
+								<use href="/feather-sprite-v4.29.0.svg#image" />
 							</svg>
-							Prova Upload
+							Upload Photo
+						</RouterLink>
+					</li>
+					<li class="nav-item">
+						<RouterLink :to="'/users/' + profile.idUser + '/images/'" class="nav-link">
+							<svg class="feather">
+								<use href="/feather-sprite-v4.29.0.svg#search" />
+							</svg>
+							Search User DA FARE
 						</RouterLink>
 					</li>
 				</ul>
@@ -90,22 +151,28 @@ export default {
 		</nav>
 		<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
 			<h3>{{this.username }}'s profile</h3>
+			<h5>Photos {{ this.profile.photoCount }}</h5>
             <h5>Follower {{ this.profile.followersCount }}</h5>
             <h5>Following {{ this.profile.followingCount }}</h5>
 			<div class="btn-toolbar mb-2 mb-md-0">
 				<div class="btn-group me-2">
 					<button class="btn btn-danger" type="button" @click="doLogout">Logout</button>
-					<input type="file" accept="image/*" class="btn btn-outline-primary" @change="uploadFile" ref="file">
-					<button class="btn btn-success" @click="submitFile">Upload</button>
 				</div>
 			</div>
 		</div>
 		<div class="row">
-			<div class="col-md-4" v-for="image in this.profile.images" :key="image.file">
-				<!-- {{ image }} -->
-				<div class="card mb-4 shadow-sm">
+			<div class="col-md-4" v-for="image in this.profile.images" :key="image.idImage">
+				<div class="card mb-4 shadow-sm fixed-size">
                 	<img class="card-img-top" :src=image.file alt="Card image cap">
 				</div>
+				<div class="d-flex justify-content-between align-items-center mb-2">
+                        <p class="card-text mb-0">Likes : {{ image.likesCount }}</p>
+						<button :class="['btn', image.likeStatus ? 'btn-success' : 'btn-danger', 'btn-sm']" type="button" @click="toggleLike(image.idImage, image.likeStatus)">{{ image.likeStatus ? 'Unlike' : 'Like' }}</button>
+                </div>
+				<div class="d-flex justify-content-between align-items-center mb-2">
+                        <p class="card-text mb-0">Comments : {{ image.commentsCount }}</p>
+						<button class="btn btn-secondary btn-sm" type="button" @click="">Comment</button>
+                </div>
 			</div>
 		</div>
 	</div>
@@ -113,12 +180,12 @@ export default {
 </template>
 
 <style>
+	.fixed-size {
+		width: 70%;
+		height: 70%;
+		object-fit: contain;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+	}
 </style>
-
-
-{
-	"user": { "idUser": 5, "username": "paper", "biography": "" },
-	"followCount": 0,
-	"followerCount": 0,
-	"idImage": [ 1, 2 ]
-}

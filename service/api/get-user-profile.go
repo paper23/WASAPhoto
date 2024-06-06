@@ -110,6 +110,26 @@ func (rt *_router) getUserProfile(w http.ResponseWriter, r *http.Request, ps htt
 		return
 	}
 
+	for index, value := range profile.Image {
+		err, profile.Image[index].LikesCount = rt.db.CountLikes(value.IdImage)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		err, profile.Image[index].CommentsCount = rt.db.CountComments(value.IdImage)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		err, profile.Image[index].LikeStatus = rt.db.CheckLikeStatus(profile.User.IdUser, value.IdImage)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+	}
+
 	err, profile.User.Biography = rt.db.FindUserBio(profile.User.IdUser)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)

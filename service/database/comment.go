@@ -62,3 +62,16 @@ func (db *appdbimpl) UncommentPhoto(idComment int) error {
 
 	return err
 }
+
+func (db *appdbimpl) CountComments(idImage int) (error, int) {
+
+	var commentsCounter int
+	commentsCounter = 0
+
+	err := db.c.QueryRow(`SELECT COUNT (*) FROM comments WHERE idImageCommented = ?`, idImage).Scan(&commentsCounter)
+	if err != nil {
+		return err, -1
+	}
+
+	return nil, commentsCounter
+}

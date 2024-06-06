@@ -72,6 +72,13 @@ type AppDatabase interface {
 	CheckPhotoOwnership(idImage int, idOwner int) (error, int)
 	GetUserImages(idOwner int) (error, []Image)
 
+	// like
+	CountLikes(idImage int) (error, int)
+	CheckLikeStatus(idUser int, idImage int) (error, bool)
+
+	// comment
+	CountComments(idImage int) (error, int)
+
 	// stream
 	GetStream(idUser int) (error, []int, []int, []string)
 
