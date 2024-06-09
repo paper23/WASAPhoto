@@ -84,6 +84,8 @@ func (rt *_router) commentPhoto(w http.ResponseWriter, r *http.Request, ps httpr
 		return
 	}
 
+	comm.IdUserWriter = token
+
 	err = json.NewDecoder(r.Body).Decode(&comm)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)

@@ -1,4 +1,5 @@
 <script>
+import Navbar from '@/components/Navbar.vue';
 export default {
 	data: function() {
 		return {
@@ -36,18 +37,24 @@ export default {
         },
 	},
 	mounted() {
-	}
+	},
+	components: {
+		Navbar,
+	},
 }
 </script>
 
 <template>
-	<h1>Carica un'immagine</h1>
-    <form @submit.prevent="uploadPhoto" method="post" enctype="multipart/form-data">
-        <label for="file">Scegli un'immagine:</label>
-        <input type="file" id="file" name="file" accept="image/*" @change="handleFileUpload" required>
-        <br><br>
-        <input type="submit" value="Carica Immagine">
-    </form>
+	<div>
+		<Navbar />
+		<h1>Carica un'immagine</h1>
+		<form @submit.prevent="uploadPhoto" method="post" enctype="multipart/form-data">
+			<label for="file">Scegli un'immagine:</label>
+			<input type="file" id="file" name="file" accept="image/*" @change="handleFileUpload" required>
+			<br><br>
+			<input type="submit" value="Carica Immagine">
+		</form>
+	</div>
 	<ErrorMsg v-if="errormsg" :msg="errormsg"></ErrorMsg>
 </template>
 

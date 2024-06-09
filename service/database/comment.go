@@ -75,3 +75,32 @@ func (db *appdbimpl) CountComments(idImage int) (error, int) {
 
 	return nil, commentsCounter
 }
+
+func (db *appdbimpl) GetComments(idImage int) (error, []CommentWrapper) {
+
+	var comments []CommentWrapper
+
+	rows, err := db.c.Query(`SELECT * FROM comments WHERE idImageCommented = ?`, idImage)
+	if err != nil {
+		return err, nil
+	}
+
+	for rows.Next() {
+		var comment CommentWrapper
+
+		err := rows.Scan(&comment.CommentData.IdComment, &comment.CommentData.IdUserWriter, &comment.CommentData.IdImage, &comment.CommentData.Text)
+		if err != nil {
+			return err, nil
+		}
+
+		err = db.c.QueryRow(`SELECT username FROM users WHERE idUser = ?`, comment.CommentData.IdUserWriter).Scan(&comment.Username)
+		if err != nil {
+			return err, nil
+		}
+
+		comments = append(comments, comment)
+	}
+
+	return nil, comments
+
+}

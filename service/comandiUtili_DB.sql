@@ -27,5 +27,8 @@ DELETE FROM images WHERE idImage = 2
 INSERT INTO likes (idLiker, idImageLiked) VALUES(2,1)
 
 SELECT * FROM likes
+SELECT * FROM comments
 
 SELECT COUNT (*) FROM likes AS l, images AS i WHERE i.idOwner = 2 AND l.idImageLiked = i.idImage
+
+SELECT * FROM comments WHERE idImageCommented = 6

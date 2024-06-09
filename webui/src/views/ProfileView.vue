@@ -1,10 +1,17 @@
 <script>
+import Navbar from '@/components/Navbar.vue';
 export default {
 	data: function() {
 		return {
 			errormsg: null,
 			username: localStorage.getItem("username"),
 			token: localStorage.getItem("token"),
+
+			showModal: false,
+			commentText: "",
+			tmpIdImageModal: null,
+			tmpIdImageDropDown: null,
+			showDropDown: false,
 
             profile: {
 				idUser: localStorage.token,
@@ -20,6 +27,20 @@ export default {
 						likesCount: 0,
 						commentsCount: 0,
 						likeStatus: null,
+						comments: [
+							{
+								commentData: [
+									{
+										idComment: 0,
+										idUserWriter: 0,
+										idImage: 0,
+										text: "",
+									}
+								],
+								username: "",
+								
+							}
+						],
 					}
 				],
 				photoCount: 0,
@@ -61,11 +82,13 @@ export default {
 		
 		async toggleLike(idImage, likeStatus) {
 			if (likeStatus) {
-				this.unlikePhoto(idImage)
+				await this.unlikePhoto(idImage)
 			}
 			else {
-				this.likePhoto(idImage)
+				await this.likePhoto(idImage)
 			}
+
+			window.location.reload();
 		},
 
 		async likePhoto(idImage) {
@@ -105,50 +128,38 @@ export default {
 				this.errormsg = e.toString();
 			}
 		},
+
+		closeModal() {
+      		this.showModal = false;
+    	},
+
+		async submitComment(text, idImage) {
+			try {
+            	let response = await this.$axios.post("/users/" + this.profile.idUser + "/images/" + idImage + "/comments/", {text}, {
+						headers: {
+							Authorization: "Bearer " + localStorage.getItem("token")
+						}})
+				this.showModal = false
+				window.location.reload()
+			}
+			catch(e) {
+				this.errormsg = e.toString();
+			}
+		},
 		
 	},
 	mounted() {
 		this.getUserProfile()
-	}
+	},
+	components: {
+		Navbar,
+	},
 }
 </script>
 
 <template>
 	<div>
-		<nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
-			<div class="position-sticky pt-3 sidebar-sticky">
-				<h6
-					class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted text-uppercase">
-					<span>General</span>
-				</h6>
-				<ul class="nav flex-column">
-					<li class="nav-item">
-						<RouterLink to="/session" class="nav-link">
-							<svg class="feather">
-								<use href="/feather-sprite-v4.29.0.svg#home" />
-							</svg>
-							Home
-						</RouterLink>
-					</li>
-					<li class="nav-item">
-						<RouterLink :to="'/users/' + profile.idUser + '/images/'" class="nav-link">
-							<svg class="feather">
-								<use href="/feather-sprite-v4.29.0.svg#image" />
-							</svg>
-							Upload Photo
-						</RouterLink>
-					</li>
-					<li class="nav-item">
-						<RouterLink :to="'/users/' + profile.idUser + '/images/'" class="nav-link">
-							<svg class="feather">
-								<use href="/feather-sprite-v4.29.0.svg#search" />
-							</svg>
-							Search User DA FARE
-						</RouterLink>
-					</li>
-				</ul>
-			</div>
-		</nav>
+		<Navbar />
 		<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
 			<h3>{{this.username }}'s profile</h3>
 			<h5>Photos {{ this.profile.photoCount }}</h5>
@@ -170,12 +181,39 @@ export default {
 						<button :class="['btn', image.likeStatus ? 'btn-success' : 'btn-danger', 'btn-sm']" type="button" @click="toggleLike(image.idImage, image.likeStatus)">{{ image.likeStatus ? 'Unlike' : 'Like' }}</button>
                 </div>
 				<div class="d-flex justify-content-between align-items-center mb-2">
-                        <p class="card-text mb-0">Comments : {{ image.commentsCount }}</p>
-						<button class="btn btn-secondary btn-sm" type="button" @click="">Comment</button>
+                        <p class="card-text mb-0 clickable" @click="showDropDown = !showDropDown; tmpIdImageDropDown = image.idImage">
+							Comments : {{ image.commentsCount }}
+							<svg class="feather" v-if="showDropDown && tmpIdImageDropDown == image.idImage">
+								<use href="/feather-sprite-v4.29.0.svg#chevron-up" />
+							</svg>
+							<svg class="feather" v-else>
+								<use href="/feather-sprite-v4.29.0.svg#chevron-down" />
+							</svg>
+						</p>
+						<button class="btn btn-secondary btn-sm" type="button" @click="showModal = true; tmpIdImageModal = image.idImage">Comment</button>
                 </div>
+				<div class="d-flex justify-content-between align-items-center mb-2">
+					<div class="dropdown">
+						<div class="dropdown-content" v-if="showDropDown && tmpIdImageDropDown == image.idImage">
+							<ul v-if="image.comments">
+									<li v-for="(item, index) in image.comments" :key="index"><b>{{ item.username }}</b> : {{ item.commentData.text }}</li>
+							</ul>
+						</div>
+					</div>
+				</div>
+				<div v-if="showModal" class="modal-overlay">
+					<div class="modal-content">
+						<textarea v-model="commentText" placeholder="Enter your comment"></textarea>
+						<button class="btn btn-primary btn-sm" @click="submitComment(commentText, tmpIdImageModal)">Submit</button>
+						<button class="btn btn-secondary btn-sm" @click="closeModal">Close</button>
+					</div>
+				</div>
 			</div>
 		</div>
 	</div>
+
+	
+
 	<ErrorMsg v-if="errormsg" :msg="errormsg"></ErrorMsg>
 </template>
 
@@ -188,4 +226,43 @@ export default {
 		justify-content: center;
 		align-items: center;
 	}
+
+	.modal-overlay {
+		position: fixed;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		background: rgba(0, 0, 0, 0.5);
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		z-index: 1050;
+	}
+
+	.modal-content {
+		background: white;
+		padding: 50px;
+		border-radius: 15px;
+		box-shadow: 0 10px 50px rgba(0, 0, 0, 1);
+		text-align: center;
+		width: 85%;
+	}
+
+	textarea {
+		width: 100%;
+		height: 100px;
+		margin-bottom: 10px;
+	}
+
+	.clickable {
+		cursor: pointer;
+		color: blue;
+		text-decoration: underline;
+	}
+
+	.clickable:hover {
+		color: darkblue;
+	}
+
 </style>

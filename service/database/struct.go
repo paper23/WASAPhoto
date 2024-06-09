@@ -7,13 +7,19 @@ type User struct {
 }
 
 type Image struct {
-	IdImage       int    `json:"idImage"`
-	IdOwner       int    `json:"idOwner"`
-	DateTime      string `json:"dateTime"`
-	File          []byte `json:"file"`
-	LikesCount    int    `json:"likesCount"`
-	CommentsCount int    `json:"commentsCount"`
-	LikeStatus    bool   `json:"likeStatus"`
+	IdImage       int              `json:"idImage"`
+	IdOwner       int              `json:"idOwner"`
+	DateTime      string           `json:"dateTime"`
+	File          []byte           `json:"file"`
+	LikesCount    int              `json:"likesCount"`
+	CommentsCount int              `json:"commentsCount"`
+	LikeStatus    bool             `json:"likeStatus"`
+	Comments      []CommentWrapper `json:"comments"`
+}
+
+type CommentWrapper struct {
+	CommentData Commenting `json:"commentData"`
+	Username    string     `json:"username"`
 }
 
 type DoubleIdUser struct {

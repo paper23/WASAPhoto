@@ -128,6 +128,13 @@ func (rt *_router) getUserProfile(w http.ResponseWriter, r *http.Request, ps htt
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
+
+		err, profile.Image[index].Comments = rt.db.GetComments(value.IdImage)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
 	}
 
 	err, profile.User.Biography = rt.db.FindUserBio(profile.User.IdUser)

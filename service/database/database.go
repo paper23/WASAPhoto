@@ -78,6 +78,7 @@ type AppDatabase interface {
 
 	// comment
 	CountComments(idImage int) (error, int)
+	GetComments(idImage int) (error, []CommentWrapper)
 
 	// stream
 	GetStream(idUser int) (error, []int, []int, []string)
