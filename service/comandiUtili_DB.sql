@@ -28,7 +28,12 @@ INSERT INTO likes (idLiker, idImageLiked) VALUES(2,1)
 
 SELECT * FROM likes
 SELECT * FROM comments
+SELECT * FROM users
 
 SELECT COUNT (*) FROM likes AS l, images AS i WHERE i.idOwner = 2 AND l.idImageLiked = i.idImage
 
 SELECT * FROM comments WHERE idImageCommented = 6
+
+INSERT INTO comments (idUserWriter, idImageCommented, text) VALUES(1, 1, "Commento da user 1")
+
+SELECT idUser FROM users WHERE username = "abviuaerv"

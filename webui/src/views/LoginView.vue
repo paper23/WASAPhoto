@@ -47,14 +47,11 @@ export default {
 </script>
 
 <template>
-    <div
-        class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
         <h1 class="h2">Welcome to WASAPhoto</h1>
     </div>
     <div class="input-group mb-3">
-        <input type="text" id="username" v-model="username" class="form-control"
-            placeholder="Insert a username to log in WASAPhoto." aria-label="Recipient's username"
-            aria-describedby="basic-addon2">
+        <input type="text" id="username" v-model="username" class="form-control" placeholder="Insert a username to log in WASAPhoto." aria-label="Recipient's username" aria-describedby="basic-addon2" @keyup.enter="doLogin">
         <div class="input-group-append">
             <button class="btn btn-success" type="button" @click="doLogin">Login</button>
         </div>

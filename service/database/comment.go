@@ -101,6 +101,12 @@ func (db *appdbimpl) GetComments(idImage int) (error, []CommentWrapper) {
 		comments = append(comments, comment)
 	}
 
+	err = rows.Err()
+
+	if err != nil {
+		return err, nil
+	}
+
 	return nil, comments
 
 }

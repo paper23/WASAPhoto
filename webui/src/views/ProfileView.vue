@@ -1,5 +1,6 @@
 <script>
 import Navbar from '@/components/Navbar.vue';
+import Toolbar from '@/components/Toolbar.vue';
 export default {
 	data: function() {
 		return {
@@ -10,12 +11,11 @@ export default {
 			showModal: false,
 			commentText: "",
 			tmpIdImageModal: null,
-			tmpIdImageDropDown: null,
 			showDropDown: false,
 
             profile: {
-				idUser: localStorage.token,
-				username: localStorage.username,
+				idUser: this.$route.params.idUser,
+				username: this.$route.query.username,
 				followersCount: 0,
 				followingCount: 0,
 				images: [
@@ -38,9 +38,9 @@ export default {
 									}
 								],
 								username: "",
-								
 							}
 						],
+						showDropDownComment: false,
 					}
 				],
 				photoCount: 0,
@@ -48,26 +48,20 @@ export default {
 		}
 	},
 	methods: {
-		async doLogout() {
-			try {
-				localStorage.removeItem("token")
-				localStorage.removeItem("username")
-				this.$router.push({ path: '/' });
-			}
-			catch(e) {
-				this.errormsg = e.toString();
-			}
-		},
-
 		async getUserProfile() {
 			try {
             	let response = await this.$axios.get("/users/" + this.profile.idUser, {
 						headers: {
 							Authorization: "Bearer " + localStorage.getItem("token")
 						}})
+				//this.profile.username = response.data.username
 				this.profile.followersCount = response.data.followerCount
 				this.profile.followingCount = response.data.followCount
 				this.profile.images = response.data.images
+
+				if (this.profile.images == null) {
+					return
+				}
 				
 				for (let i = 0; i < this.profile.images.length; i++) {
 					this.profile.images[i].file = 'data:image/*;base64,' + this.profile.images[i].file
@@ -146,6 +140,20 @@ export default {
 				this.errormsg = e.toString();
 			}
 		},
+
+		async uncommentPhoto(idImage, idComment) {
+			try {
+            	let response = await this.$axios.delete("/users/" + this.profile.idUser + "/images/" + idImage + "/comments/" + idComment, {
+						headers: {
+							Authorization: "Bearer " + localStorage.getItem("token")
+						}})
+				
+				window.location.reload()
+			}
+			catch(e) {
+				this.errormsg = e.toString();
+			}
+		},
 		
 	},
 	mounted() {
@@ -153,7 +161,16 @@ export default {
 	},
 	components: {
 		Navbar,
+		Toolbar,
 	},
+	computed: {
+		idUser() {
+			return this.$route.params.idUser;
+		},
+		username() {
+		return this.$route.query.username;
+		},
+  	},
 }
 </script>
 
@@ -161,29 +178,28 @@ export default {
 	<div>
 		<Navbar />
 		<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-			<h3>{{this.username }}'s profile</h3>
+			<h3>{{this.profile.username }}'s profile</h3>
 			<h5>Photos {{ this.profile.photoCount }}</h5>
             <h5>Follower {{ this.profile.followersCount }}</h5>
             <h5>Following {{ this.profile.followingCount }}</h5>
-			<div class="btn-toolbar mb-2 mb-md-0">
-				<div class="btn-group me-2">
-					<button class="btn btn-danger" type="button" @click="doLogout">Logout</button>
-				</div>
-			</div>
+			<Toolbar />
 		</div>
-		<div class="row">
+		<div class="row" v-if="this.profile.images != null">
 			<div class="col-md-4" v-for="image in this.profile.images" :key="image.idImage">
 				<div class="card mb-4 shadow-sm fixed-size">
                 	<img class="card-img-top" :src=image.file alt="Card image cap">
+					<svg v-if="image.idOwner == this.token" class="feather clickable-red position-absolute top-0 end-0 m-0 remove-icon" title="Delete this photo" @click="deletePhoto(image.idImage)">
+						<use href="/feather-sprite-v4.29.0.svg#x" />
+					</svg>
 				</div>
 				<div class="d-flex justify-content-between align-items-center mb-2">
                         <p class="card-text mb-0">Likes : {{ image.likesCount }}</p>
 						<button :class="['btn', image.likeStatus ? 'btn-success' : 'btn-danger', 'btn-sm']" type="button" @click="toggleLike(image.idImage, image.likeStatus)">{{ image.likeStatus ? 'Unlike' : 'Like' }}</button>
                 </div>
 				<div class="d-flex justify-content-between align-items-center mb-2">
-                        <p class="card-text mb-0 clickable" @click="showDropDown = !showDropDown; tmpIdImageDropDown = image.idImage">
+                        <p class="card-text mb-0 clickable" @click="image.showDropDownComment = !image.showDropDownComment">
 							Comments : {{ image.commentsCount }}
-							<svg class="feather" v-if="showDropDown && tmpIdImageDropDown == image.idImage">
+							<svg class="feather" v-if="image.showDropDownComment">
 								<use href="/feather-sprite-v4.29.0.svg#chevron-up" />
 							</svg>
 							<svg class="feather" v-else>
@@ -194,9 +210,15 @@ export default {
                 </div>
 				<div class="d-flex justify-content-between align-items-center mb-2">
 					<div class="dropdown">
-						<div class="dropdown-content" v-if="showDropDown && tmpIdImageDropDown == image.idImage">
+						<div class="dropdown-content" v-if="image.showDropDownComment">
 							<ul v-if="image.comments">
-									<li v-for="(item, index) in image.comments" :key="index"><b>{{ item.username }}</b> : {{ item.commentData.text }}</li>
+									<li v-for="(item, index) in image.comments" :key="index">
+										<b>{{ item.username }}</b> : {{ item.commentData.text }}
+										<svg class="feather clickable-red" v-if="item.commentData.idUserWriter == this.token" @click="uncommentPhoto(image.idImage, item.commentData.idComment)">
+											<use href="/feather-sprite-v4.29.0.svg#trash-2" />
+										</svg>
+									</li>
+									<br><br><br><br>
 							</ul>
 						</div>
 					</div>
@@ -210,9 +232,13 @@ export default {
 				</div>
 			</div>
 		</div>
+		<div v-else class="centered">
+			<svg class="feather">
+				<use href="/feather-sprite-v4.29.0.svg#image" />
+			</svg>
+			<h4>Non hai caricato nessuna immagine</h4>
+		</div>
 	</div>
-
-	
 
 	<ErrorMsg v-if="errormsg" :msg="errormsg"></ErrorMsg>
 </template>
@@ -258,11 +284,43 @@ export default {
 	.clickable {
 		cursor: pointer;
 		color: blue;
-		text-decoration: underline;
 	}
 
 	.clickable:hover {
 		color: darkblue;
+	}
+
+	.clickable-red {
+		cursor: pointer;
+		color: red;
+	}
+
+	.clickable-red:hover {
+		color: darkred;
+		text-decoration: underline;
+		text-decoration-color: darkred;
+	}
+
+	.centered {
+		justify-content: center;
+		text-align: center;
+		align-items: center;
+	}
+
+	.remove-icon {
+		top: -10px; /* Posiziona l'icona sopra la card */
+		right: -10px; /* Posiziona l'icona a destra della card */
+		cursor: pointer;
+		width: 3px; /* Dimensione dell'icona */
+		height: 3px; /* Dimensione dell'icona */
+		background: white; /* Sfondo bianco per maggiore contrasto */
+		border-radius: 35%; /* Forma circolare */
+		padding: 1px; /* Spazio intorno all'icona */
+		box-shadow: 0 0 5px rgba(0, 0, 0, 0.4); /* Aggiunge un'ombra per staccarla visivamente */
+	}
+
+	.remove-icon use {
+		fill: red; /* Colore dell'icona */
 	}
 
 </style>

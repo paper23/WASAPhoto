@@ -1086,3 +1086,61 @@ paths:
                     description: error type
                     type: string
                     example: user/user id not found
+
+  /users/{username}/bans/:
+    #searchUser
+    get:
+      security:
+        - bearerAuth: []
+      tags: ["user"]
+      operationId: searchUser
+      summary: search an existing user
+      description: |
+        searching an existing user given an username
+      parameters:
+      - name: username
+        in: path
+        schema:
+          type: string
+          example: lorenzo
+        required: true
+      responses:
+        "200":
+          description: user succesfully finded
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/User" }
+        "404":
+          description: user not found
+          content:
+            application/json:
+              schema:
+                description: returns an error string and the username searched
+                type: object
+                properties:
+                  username:
+                    description: the username searched
+                    type: string
+                    example: lorenzo
+                  error:
+                    description: error type
+                    type: string
+                    example: user not found
+        "401":
+          description: you must be logged in
+        "403":
+          description: you have been banned from the user and/or you have banned the user/you, or, you can't search yourself
+          content:
+            application/json:
+              schema:
+                description: returns an error string and the username searched
+                type: object
+                properties:
+                  username:
+                    description: the username searched
+                    type: string
+                    example: lorenzo
+                  error:
+                    description: error type
+                    type: string
+                    example: you have been banned from the user and/or you have banned the user/you or you can't search yoursefl

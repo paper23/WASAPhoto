@@ -1,5 +1,6 @@
 <script>
 import Navbar from '@/components/Navbar.vue';
+import Toolbar from '@/components/Toolbar.vue';
 export default {
 	data: function() {
 		return {
@@ -40,23 +41,32 @@ export default {
 	},
 	components: {
 		Navbar,
+		Toolbar
 	},
 }
 </script>
 
 <template>
+	<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+		<h1 class="mb-4">Upload Photo</h1>
+		<Toolbar />
+	</div>
 	<div>
 		<Navbar />
-		<h1>Carica un'immagine</h1>
-		<form @submit.prevent="uploadPhoto" method="post" enctype="multipart/form-data">
-			<label for="file">Scegli un'immagine:</label>
-			<input type="file" id="file" name="file" accept="image/*" @change="handleFileUpload" required>
-			<br><br>
-			<input type="submit" value="Carica Immagine">
-		</form>
+		<div class="container d-flex justify-content-center align-items-center">
+			<div class="text-center w-50">
+				<form @submit.prevent="uploadPhoto" method="post" enctype="multipart/form-data" class="border p-4 rounded">
+				<div class="form-group">
+					<label for="file" class="form-label">Choose a photo:</label>
+					<input type="file" id="file" name="file" accept="image/*" @change="handleFileUpload" class="form-control" required>
+				</div>
+				<br>
+				<button type="submit" class="btn btn-primary">UPLOAD</button>
+				</form>
+			</div>
+		</div>
 	</div>
-	<ErrorMsg v-if="errormsg" :msg="errormsg"></ErrorMsg>
-</template>
+  </template>
 
 <style>
 </style>

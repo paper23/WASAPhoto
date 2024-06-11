@@ -37,8 +37,39 @@
 					}
 				],	
                 },
+
+				searchUsername: "",
             }
-        }
+        },
+		methods: {
+			async SearchUser() {
+				try {
+            		let response = await this.$axios.get("/search/" + this.searchUsername, {
+						headers: {
+							Authorization: "Bearer " + localStorage.getItem("token")
+						}})
+					
+					this.$router.push({ path: '/users/' + response.data.idUser , query: { username: this.searchUsername }})
+						.then(() => {
+							this.$router.go(0);
+						})
+				}
+				catch (e) {
+					this.errormsg = e.toString();
+				}
+			},
+			
+			async handleProfileClick(event) {
+				event.preventDefault();
+				const targetPath = '/users/' + this.token;
+				const targetQuery = { username: this.username };
+
+				this.$router.push({ path: '/', query: {} }).then(() => {
+				this.$router.push({ path: targetPath, query: targetQuery }); });
+
+				
+			},
+		}
     }
 </script>
 
@@ -65,15 +96,38 @@
 						Upload Photo
 					</RouterLink>
 				</li>
-				<li class="nav-item">
-					<RouterLink :to="'/users/' + profile.idUser + '/images/'" class="nav-link">
+				<li class="nav-item nav-link">
 						<svg class="feather">
 							<use href="/feather-sprite-v4.29.0.svg#search" />
 						</svg>
-						Search User DA FARE
+						Search User
+					<div class="input-group mb-0">
+						<input type="text" id="searchUserUsername" v-model="searchUsername" class="form-control" placeholder="Username" required>
+						<button class="btn btn-outline-dark" type="button" @click="SearchUser">
+						<svg class="feather">
+							<use href="/feather-sprite-v4.29.0.svg#search" />
+						</svg>
+						</button>
+					</div>
+				</li>
+				<li class="nav-item">
+					<RouterLink :to="'/users/' + this.token + '?username=' + this.username" class="nav-link" @click.native="handleProfileClick">
+						<svg class="feather">
+							<use href="/feather-sprite-v4.29.0.svg#user" />
+						</svg>
+						Profile
+					</RouterLink>
+				</li>
+				<li class="nav-item">
+					<RouterLink :to="'/users/' + this.token + '/bans/'" class="nav-link">
+						<svg class="feather">
+							<use href="/feather-sprite-v4.29.0.svg#slash" />
+						</svg>
+						Banned Users
 					</RouterLink>
 				</li>
 			</ul>
 		</div>
 	</nav>
+	<ErrorMsg v-if="errormsg" :msg="errormsg"></ErrorMsg>
 </template>
