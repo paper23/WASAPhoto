@@ -467,6 +467,58 @@ paths:
                     example: 1
         "401":
           description: you must be logged in, not banned
+
+    #getBannedList
+    get:
+      security:
+        - bearerAuth: []
+      tags: ["ban"]
+      operationId: getBannedList
+      summary: returns the users who you have banned
+      description: |
+        get the list of the users who you have banned
+      parameters:
+      - name: idUser
+        in: path
+        description: the identifier of the user requesting the list
+        schema:
+          type: integer
+          example: 1
+        required: true
+      responses:
+        "200":
+          description: get banned list
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/User" }
+        "403":
+          description: you can't see another user's banned list
+          content:
+            application/json:
+              schema:
+                description: returns the idUser
+                type: object
+                properties:
+                  idUser:
+                    description: the wrong id user
+                    type: integer
+                    example: 1
+        "404":
+          description: user not found
+          content:
+            application/json:
+              schema:
+                description: returns the idUser
+                type: object
+                properties:
+                  idUser:
+                    description: the wrong id user
+                    type: integer
+                    example: 1
+        "401":
+          description: you must be logged in, not banned
   
   /users/{idUser}/bans/{idUserBanned}:
     #unbanUser
