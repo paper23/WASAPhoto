@@ -98,9 +98,9 @@ func (db *appdbimpl) SbanUser(idUser int, idUserToSban int) error {
 	return err
 }
 
-func (db *appdbimpl) CheckFollowing(idUser int, idUserToUnfollow int) (error, int) {
+func (db *appdbimpl) CheckFollowing(idUser int, idUserToCheck int) (error, int) {
 	var count int
-	err := db.c.QueryRow(`SELECT COUNT(*) FROM follows WHERE idFollower = ? AND idFollowed = ?`, idUser, idUserToUnfollow).Scan(&count)
+	err := db.c.QueryRow(`SELECT COUNT(*) FROM follows WHERE idFollower = ? AND idFollowed = ?`, idUser, idUserToCheck).Scan(&count)
 
 	if err != nil {
 		return err, -1

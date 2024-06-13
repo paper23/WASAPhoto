@@ -28,6 +28,20 @@ export default {
 			catch(e) {
 				this.errormsg = e.toString();
 			}
+        },
+
+        async unbanUser(idUserBanned) {
+            try {
+            	let response = await this.$axios.delete("/users/" + this.token + "/bans/" + idUserBanned, {
+						headers: {
+							Authorization: "Bearer " + localStorage.getItem("token")
+						}})
+				
+				window.location.reload();
+			}
+			catch(e) {
+				this.errormsg = e.toString();
+			}
         }
     },
 
@@ -49,13 +63,20 @@ export default {
             <h3>List of users you have banned</h3>
             <Toolbar />
         </div>
-        <div class="row" v-if="this.bannedUsers[0].idUser != 0">
-            <ul>
-                <li v-for="banned in this.bannedUsers" :key="banned.idUser">
-                    {{ banned.username }}
-                    <button class="btn btn-success">Unban</button>
-                </li>
-            </ul>
+        <div class="row justify-content-center align-items-center" v-if="this.bannedUsers[0].idUser != 0">
+            <div class="text-center">
+                <ul>
+                    <li v-for="banned in this.bannedUsers" :key="banned.idUser">
+                        {{ banned.username }}
+                        <button class="btn btn-success" style="margin-left: 10px;" @click="unbanUser(banned.idUser)">Unban</button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="row justify-content-center align-items-center" v-else>
+            <div class="text-center">
+                <h3>You have not banned any users</h3>
+            </div>
         </div>
     </div>
     <ErrorMsg v-if="errormsg" :msg="errormsg"></ErrorMsg>

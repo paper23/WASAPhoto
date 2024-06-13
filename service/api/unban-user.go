@@ -35,7 +35,7 @@ func (rt *_router) unbanUser(w http.ResponseWriter, r *http.Request, ps httprout
 	}
 
 	var count int
-	err, count = rt.db.FindUserById(userToSban.IdUser)
+	err, count = rt.db.FindUserById(user.IdUser)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
@@ -159,10 +159,6 @@ func (rt *_router) unbanUser(w http.ResponseWriter, r *http.Request, ps httprout
 	// 200 - user sbanned succesfully
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	err = json.NewEncoder(w).Encode(userToSban)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
+	return
 
 }

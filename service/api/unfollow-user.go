@@ -11,8 +11,7 @@ import (
 // unfollow an existing and followed user given its id
 func (rt *_router) unfollowUser(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
-	var user User
-	var userToUnfollow User
+	var idUserToUnfollow int
 	var err error
 	var token int
 
@@ -28,23 +27,24 @@ func (rt *_router) unfollowUser(w http.ResponseWriter, r *http.Request, ps httpr
 		return
 	}
 
-	user.IdUser, err = strconv.Atoi(ps.ByName("idUser"))
+	idUserToUnfollow, err = strconv.Atoi(ps.ByName("idUser"))
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
 	var count int
-	err, count = rt.db.FindUserById(user.IdUser)
+
+	err, count = rt.db.FindUserById(idUserToUnfollow)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	// 404 - user (follower) not found, not unfollowed
+	// 404 - user to unfollow not found, not unfollowed
 	if count <= 0 {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusNotFound)
-		err = json.NewEncoder(w).Encode(user.IdUser)
+		err = json.NewEncoder(w).Encode(idUserToUnfollow)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
@@ -52,39 +52,11 @@ func (rt *_router) unfollowUser(w http.ResponseWriter, r *http.Request, ps httpr
 		return
 	}
 
-	userToUnfollow.IdUser, err = strconv.Atoi(ps.ByName("idUserToUnfollow"))
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	err, count = rt.db.FindUserById(userToUnfollow.IdUser)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-	// 404 - user (to unfollow) not found, not unfollowed
-	if count <= 0 {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusNotFound)
-		err = json.NewEncoder(w).Encode(userToUnfollow.IdUser)
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-		return
-	}
-
-	// 403 - you cannot unfollow an user for another user, not unfollowed
-	if token != user.IdUser {
+	// 403 - you cannot unfollow yourself, not unfollowed
+	if token == idUserToUnfollow {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusForbidden)
-		err = json.NewEncoder(w).Encode(user.IdUser)
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-		err = json.NewEncoder(w).Encode(token)
+		err = json.NewEncoder(w).Encode(idUserToUnfollow)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
@@ -92,50 +64,53 @@ func (rt *_router) unfollowUser(w http.ResponseWriter, r *http.Request, ps httpr
 		return
 	}
 
-	// 403 - you can't unfollow yourself, not unfollowed
-	if user.IdUser == userToUnfollow.IdUser {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusForbidden)
-		err = json.NewEncoder(w).Encode(user.IdUser)
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-		err = json.NewEncoder(w).Encode(userToUnfollow.IdUser)
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-		err = json.NewEncoder(w).Encode(token)
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-		return
-	}
-
-	count = 0
-	err, count = rt.db.CheckFollowing(user.IdUser, userToUnfollow.IdUser)
+	err, count = rt.db.CheckBan(token, idUserToUnfollow)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	// 403 - you can't unfollow a user you don't yet follow, not unfollowed
+	// 403 - you can't unfollow an user you have banned
+	if count > 0 {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusForbidden)
+		err = json.NewEncoder(w).Encode(idUserToUnfollow)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		return
+	}
+
+	err, count = rt.db.CheckBan(idUserToUnfollow, token)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	// 403 - you can't unfollow an user who has banned you
+	if count > 0 {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusForbidden)
+		err = json.NewEncoder(w).Encode(idUserToUnfollow)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		return
+	}
+
+	err, count = rt.db.CheckFollowing(token, idUserToUnfollow)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	// 403 - you can't unfollow an user you don't follow yet, not unfollowed
 	if count <= 0 {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusForbidden)
-		err = json.NewEncoder(w).Encode(user.IdUser)
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-		err = json.NewEncoder(w).Encode(userToUnfollow.IdUser)
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-		err = json.NewEncoder(w).Encode(token)
+		err = json.NewEncoder(w).Encode(idUserToUnfollow)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
@@ -143,13 +118,7 @@ func (rt *_router) unfollowUser(w http.ResponseWriter, r *http.Request, ps httpr
 		return
 	}
 
-	err = rt.db.UnfollowUser(user.IdUser, userToUnfollow.IdUser)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	err, userToUnfollow.IdUser, userToUnfollow.Username, userToUnfollow.Biography = rt.db.SelectUser(userToUnfollow.IdUser)
+	err = rt.db.UnfollowUser(token, idUserToUnfollow)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
@@ -158,10 +127,6 @@ func (rt *_router) unfollowUser(w http.ResponseWriter, r *http.Request, ps httpr
 	// 200 - user succesfully unfollowed
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	err = json.NewEncoder(w).Encode(userToUnfollow)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
+	return
 
 }

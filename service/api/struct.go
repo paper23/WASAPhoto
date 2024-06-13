@@ -48,6 +48,7 @@ type UserProfile struct {
 	FollowCount   int              `json:"followCount"`
 	FollowerCount int              `json:"followerCount"`
 	Image         []database.Image `json:"images"`
+	FollowStatus  bool             `json:"followStatus"`
 }
 
 type Stream struct {

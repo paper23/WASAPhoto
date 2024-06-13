@@ -52,8 +52,19 @@ func (rt *_router) deletePhoto(w http.ResponseWriter, r *http.Request, ps httpro
 		return
 	}
 
-	img.IdImage, err = strconv.Atoi(ps.ByName("idImage"))
+	// 403 - forbidden, you can't delete a photo for another user
+	if img.IdOwner != token {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusForbidden)
+		err = json.NewEncoder(w).Encode(img)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		return
+	}
 
+	img.IdImage, err = strconv.Atoi(ps.ByName("idImage"))
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
@@ -81,10 +92,10 @@ func (rt *_router) deletePhoto(w http.ResponseWriter, r *http.Request, ps httpro
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	// 401 - unauthorized, only the owner can delete a photo, photo not deleted
+	// 403 - forbidden, only the owner can delete a photo, photo not deleted
 	if count <= 0 {
 		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusUnauthorized)
+		w.WriteHeader(http.StatusForbidden)
 		err = json.NewEncoder(w).Encode(img)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)

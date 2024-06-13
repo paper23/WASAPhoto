@@ -30,7 +30,8 @@ export default {
 							Authorization: "Bearer " + this.token,
 							'Content-Type': 'multipart/form-data'
 						}})
-                this.$router.push({ path: '/users/' + this.token });
+
+				this.$router.push({ path: '/users/' + this.token, query: { username: this.username }});
             }
             catch(e) {
                 this.errormsg = e.toString();

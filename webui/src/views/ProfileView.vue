@@ -45,6 +45,7 @@ export default {
 					}
 				],
 				photoCount: 0,
+				followStatus: null,
 			},
 		}
 	},
@@ -59,6 +60,7 @@ export default {
 				this.profile.followersCount = response.data.followerCount
 				this.profile.followingCount = response.data.followCount
 				this.profile.images = response.data.images
+				this.profile.followStatus = response.data.followStatus
 
 				if (this.profile.images == null) {
 					return
@@ -189,7 +191,44 @@ export default {
 		},
 
 		async deletePhoto(idImage) {
+			try {
+            	let response = await this.$axios.delete("/users/" + this.token + "/images/" + idImage, {
+						headers: {
+							Authorization: "Bearer " + localStorage.getItem("token")
+						}})
+				
+				window.location.reload();
+			}
+			catch(e) {
+				this.errormsg = e.toString();
+			}
+		},
 
+		async followUser() {
+			try {
+            	let response = await this.$axios.post("/users/" + this.profile.idUser + "/follows/", {}, {
+						headers: {
+							Authorization: "Bearer " + localStorage.getItem("token")
+						}})
+				window.location.reload();
+			}
+			catch(e) {
+				this.errormsg = e.toString();
+			}
+		},
+
+		async unfollowUser() {
+			try {
+            	let response = await this.$axios.delete("/users/" + this.profile.idUser + "/follows/", {
+						headers: {
+							Authorization: "Bearer " + localStorage.getItem("token")
+						}})
+				
+				window.location.reload();
+			}
+			catch(e) {
+				this.errormsg = e.toString();
+			}
 		},
 		
 	},
@@ -223,6 +262,10 @@ export default {
 				<input class="form-control" type="text" id="testo" v-model="inputChangeUsername" required placeholder="Insert a new username">
 				<center><button class="btn btn-success" type="submit">Change username</button></center>
 			</form>
+			<div v-else>
+				<button class="btn btn-outline-primary" v-if="!this.profile.followStatus" @click="followUser"><i>Follow</i></button>
+				<button class="btn btn-outline-dark" v-else @click="unfollowUser"><i>Unfollow</i></button>
+			</div>
 			<button class="btn btn-warning" v-if="this.token != this.profile.idUser" @click="banUser">Ban user</button>
 			<Toolbar />
 		</div>

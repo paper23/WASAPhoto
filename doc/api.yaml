@@ -259,19 +259,28 @@ paths:
         "200":
           description: photo succesfully deleted
         "401":
-          description: unauthorized, only the owner can delete a photo, photo not deleted
+          description: you must be logged in, photo not deleted
+        "404":
+          description: user and/or photo not found, photo not deleted
           content:
             application/json:
               schema:
-                description: returns an error string
+                description: returns the idOwner, the idImage and an error string
                 type: object
                 properties:
+                  idOwner:
+                    description: the identifier of the owner of the photo
+                    type: integer
+                    example: 1
+                  idImage:
+                    description: the identifier of the photo to delete
+                    type: integer
                   error:
                     description: error type
                     type: string
-                    example: you are not the owner of the photo or you are not logged in, photo not deleted
-        "404":
-          description: user and/or photo not found, photo not deleted
+                    example: photo id not found, photo not deleted
+        "403":
+          description: only the owner can his own photos
           content:
             application/json:
               schema:
@@ -548,9 +557,6 @@ paths:
       responses:
         "200":
           description: user succesfully unbanned
-          content:
-            application/json:
-              schema: { $ref: "#/components/schemas/User" }
         "401":
           description: you must be logged in, not banned
         "403":
@@ -910,71 +916,40 @@ paths:
       - name: idUser
         in: path
         schema:
+          description: the identifier of the user to follow
           type: integer
           example: 1
         required: true
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              description: requests the idUserToFollow
-              type: object
-              properties:
-                idUserToFollow:
-                  description: the identifier of the user to follow
-                  type: integer
-                  example: 1
       responses:
         "200":
           description: user successfully followed
-          content:
-            application/json:
-              schema: { $ref: "#/components/schemas/User" }
         "404":
           description: user not found, not followed
           content:
             application/json:
               schema:
-                description: returns the idUser, the idUserToFollow and an error string
+                description: returns the idUserToFollow
                 type: object
                 properties:
-                  idUser:
-                    description: the identifier of the user
-                    type: integer
-                    example: 1
                   idUserToFollow:
                     description: the identifier of the user to follow
                     type: integer
                     example: 2
-                  error:
-                    description: error type
-                    type: string
-                    example: user id or userToFollow id not found, user not followed
         "403":
-          description: you have been banned from the user and/or you have banned the user/you can't follow yourself/you cannot follow an user for another user, not followed
+          description: you have been banned from the user and/or you have banned the user/you can't follow yourself, not followed
           content:
             application/json:
               schema:
-                description: returns the idUser, the idUserToFollow and the token (bearer)
+                description: returns the idUserToFollow
                 type: object
                 properties:
-                  idUser:
-                    description: the identifier of the user
-                    type: integer
-                    example: 1
                   idUserToFollow:
                     description: the identifier of the user to follow
                     type: integer
                     example: 2
-                  token:
-                    description: the authentication token
-                    type: integer
-                    example: 3
         "401":
           description: you must be logged in, not followed
-  
-  /users/{idUser}/follows/{idUserToUnfollow}:
+
     #unfollowUser
     delete:
       security:
@@ -991,62 +966,37 @@ paths:
           type: integer
           example: 1
         required: true
-      - name: idUserToUnfollow
-        in: path
-        schema:
-          type: integer
-          example: 1
-        required: true
       responses:
         "200":
           description: user succesfully unfollowed
-          content:
-            application/json:
-              schema: { $ref: "#/components/schemas/User" }
         "403":
           description: |
             forbidden, you can't unfollow an user if you don't follow him first/you can't unfollow a user who has banned you and/or you already banned/you can't unfollow an user for another user, user not unfollowed
           content:
             application/json:
               schema:
-                description: returns the idUser, the idUserToUnfollow and the token (bearer)
+                description: returns the idUserToUnfollow
                 type: object
                 properties:
-                  idUser:
-                    description: the identifier of the user to unfollow
-                    type: integer
-                    example: 1
                   idUserToUnfollow:
                     description: the identifier of the user to unfollow
                     type: integer
                     example: 1
-                  token:
-                    description: the authentication token
-                    type: integer
-                    example: 3
         "404":
           description: user not found, user not unfollowed
           content:
             application/json:
               schema:
-                description: returns the idUser, the idUserToUnfollow and an error string
+                description: returns the idUserToUnfollow
                 type: object
                 properties:
-                  idUser:
-                    description: the identifier of the user
-                    type: integer
-                    example: 1
                   idUserToUnfollow:
                     description: the identifier of the user to unfollow
                     type: integer
                     example: 1
-                  error:
-                    description: error type
-                    type: string
-                    example: user/user to unfollow id not found, user not unfollowed
         "401":
           description: you must be logged in, not unfollowed
-
+    
   /users/{idUser}/stream:
     #getMyStream
     get:

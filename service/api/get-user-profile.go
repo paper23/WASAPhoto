@@ -137,6 +137,18 @@ func (rt *_router) getUserProfile(w http.ResponseWriter, r *http.Request, ps htt
 
 	}
 
+	err, count = rt.db.CheckFollowing(token, profile.User.IdUser)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	if count > 0 {
+		profile.FollowStatus = true
+	} else {
+		profile.FollowStatus = false
+	}
+
 	err, profile.User.Biography = rt.db.FindUserBio(profile.User.IdUser)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)

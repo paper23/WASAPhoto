@@ -49,7 +49,7 @@ type AppDatabase interface {
 	BanUser(idUser int, idUserToBan int) error
 	CheckBan(idUser int, idUserToCheck int) (error, int)
 	SbanUser(idUser int, idUserToSban int) error
-	CheckFollowing(idUser int, idUserToUnfollow int) (error, int)
+	CheckFollowing(idUser int, idUserToCheck int) (error, int)
 	UnfollowUser(idUser int, idUserToUnfolow int) error
 	FindUserBio(idUser int) (error, string)
 	FindUsername(idUser int) (error, string)

@@ -37,3 +37,7 @@ SELECT * FROM comments WHERE idImageCommented = 6
 INSERT INTO comments (idUserWriter, idImageCommented, text) VALUES(1, 1, "Commento da user 1")
 
 SELECT idUser FROM users WHERE username = "abviuaerv"
+
+SELECT * FROM follows
+
+DELETE FROM follows WHERE idFollower = 2
