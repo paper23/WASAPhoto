@@ -75,13 +75,13 @@ func (rt *_router) uploadPhoto(w http.ResponseWriter, r *http.Request, ps httpro
 		return
 	}
 
-	err = r.ParseMultipartForm(10 << 20) //MAX 10MB
+	err = r.ParseMultipartForm(10 << 20) // MAX 10MB
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	file, handler, err := r.FormFile("file")
+	file, _, err := r.FormFile("file")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -96,14 +96,6 @@ func (rt *_router) uploadPhoto(w http.ResponseWriter, r *http.Request, ps httpro
 	}
 
 	img.File = buf.Bytes()
-	print(handler.Filename) //TROVARE UNA SOLUZIONE PER NON USARE QUESTO
-
-	/*err = json.NewDecoder(r.Body).Decode(&img)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		print("CIAO")
-		return
-	}*/
 
 	layout := "2006-01-02T15:04:05Z07:00"
 	img.DateTime = time.Now().Format(layout)
