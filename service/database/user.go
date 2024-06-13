@@ -176,3 +176,40 @@ func (db *appdbimpl) CountFollowers(idUser int) (error, int) {
 
 	return err, count
 }
+
+func (db *appdbimpl) GetBanned(idUser int) (error, []User) {
+
+	var bannedList []User
+
+	rows, err := db.c.Query(`SELECT idBanned FROM bans WHERE idUser = ?`, idUser)
+	if err != nil {
+		return err, nil
+	}
+
+	for rows.Next() {
+		var idBanned User
+
+		err := rows.Scan(&idBanned.IdUser)
+		if err != nil {
+			return err, nil
+		}
+
+		bannedList = append(bannedList, idBanned)
+	}
+	err = rows.Err()
+
+	if err != nil {
+		return err, nil
+	}
+
+	for index := range bannedList {
+
+		err = db.c.QueryRow(`SELECT username FROM users WHERE idUser = ?`, bannedList[index].IdUser).Scan(&bannedList[index].Username)
+		if err != nil {
+			return err, nil
+		}
+	}
+
+	return nil, bannedList
+
+}

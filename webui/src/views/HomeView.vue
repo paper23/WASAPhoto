@@ -25,6 +25,7 @@ export default {
 			<Toolbar />
 		</div>
 	</div>
+	<ErrorMsg v-if="errormsg" :msg="errormsg"></ErrorMsg>
 </template>
 
 <style>

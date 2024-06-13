@@ -430,22 +430,11 @@ paths:
       parameters:
       - name: idUser
         in: path
-        description: the identifier of the user who is banning the other user
+        description: the identifier of the user you want to ban
         schema:
           type: integer
+          example: 1
         required: true
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              description: requests the id of the user to ban
-              type: object
-              properties:
-                idUserToBan:
-                  description: the identifier of the user to ban
-                  type: integer
-                  example: 1
       responses:
         "200":
           description: user banned successfully
@@ -453,23 +442,15 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/User" }
         "403":
-          description: user already banned/you can't ban an user for another user/you can't ban yourself, not banned
+          description: user already banned/you can't ban yourself, not banned
           content:
             application/json:
               schema:
-                description: returns the idUser, the idUserToBan and the token
+                description: returns the idUserToBan
                 type: object
                 properties:
-                  idUser:
-                    description: the id of the user who is banning
-                    type: integer
-                    example: 1
                   idUserToBan:
                     description: the id of the user to ban
-                    type: integer
-                    example: 2
-                  token: 
-                    description: the authentication token
                     type: integer
                     example: 1
         "404":
@@ -477,13 +458,9 @@ paths:
           content:
             application/json:
               schema:
-                description: returns the idUser and the idUserToBan
+                description: returns the idUserToBan
                 type: object
                 properties:
-                  idUser:
-                    description: id of the user who is banning
-                    type: integer
-                    example: 2
                   idUserToBan:
                     description: the identifier of the user to ban
                     type: integer

@@ -7,11 +7,11 @@
                 token: localStorage.getItem("token"),
                 
                 profile: {
-				idUser: localStorage.token,
-				username: localStorage.username,
-				followersCount: 0,
-				followingCount: 0,
-                images: [
+					idUser: localStorage.token,
+					username: localStorage.username,
+					followersCount: 0,
+					followingCount: 0,
+					images: [
 					{
 						idImage: 0,
 						idOwner: 0,
@@ -111,7 +111,7 @@
 					</div>
 				</li>
 				<li class="nav-item">
-					<RouterLink :to="'/users/' + this.token + '?username=' + this.username" class="nav-link" @click.native="handleProfileClick">
+					<RouterLink :to="'/users/' + this.token + '?username=' + this.username" class="nav-link" @click="handleProfileClick">
 						<svg class="feather">
 							<use href="/feather-sprite-v4.29.0.svg#user" />
 						</svg>

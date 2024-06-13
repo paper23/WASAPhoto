@@ -62,6 +62,7 @@ func (rt *_router) searchUser(w http.ResponseWriter, r *http.Request, ps httprou
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
+		return
 	}
 
 	var count int

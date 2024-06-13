@@ -80,6 +80,9 @@ type AppDatabase interface {
 	CountComments(idImage int) (error, int)
 	GetComments(idImage int) (error, []CommentWrapper)
 
+	// ban
+	GetBanned(idUser int) (error, []User)
+
 	// stream
 	GetStream(idUser int) (error, []int, []int, []string)
 

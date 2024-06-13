@@ -12,6 +12,7 @@ export default {
 			commentText: "",
 			tmpIdImageModal: null,
 			showDropDown: false,
+			inputChangeUsername: "",
 
             profile: {
 				idUser: this.$route.params.idUser,
@@ -54,7 +55,7 @@ export default {
 						headers: {
 							Authorization: "Bearer " + localStorage.getItem("token")
 						}})
-				//this.profile.username = response.data.username
+				
 				this.profile.followersCount = response.data.followerCount
 				this.profile.followingCount = response.data.followCount
 				this.profile.images = response.data.images
@@ -154,6 +155,42 @@ export default {
 				this.errormsg = e.toString();
 			}
 		},
+
+		async changeUsername() {
+			try {
+				let response = await this.$axios.put("/users/" + this.profile.idUser, { username: this.inputChangeUsername }, {
+					headers: {
+						Authorization: "Bearer " + localStorage.getItem("token")
+				}})
+
+				localStorage.setItem("username", this.inputChangeUsername)
+				this.profile.username = this.inputChangeUsername
+				this.$router.push({ path: '/users/' + this.profile.idUser, query: { username: this.profile.username }})
+						.then(() => {
+							this.$router.go(0);
+						})
+			}
+			catch(e) {
+				this.errormsg = e.toString();
+			}
+		},
+
+		async banUser() {
+			try {
+            	let response = await this.$axios.post("/users/" + this.profile.idUser + "/bans/" , {}, {
+						headers: {
+							Authorization: "Bearer " + localStorage.getItem("token")
+						}})
+				this.$router.push({ path: '/session' })
+			}
+			catch(e) {
+				this.errormsg = e.toString();
+			}
+		},
+
+		async deletePhoto(idImage) {
+
+		},
 		
 	},
 	mounted() {
@@ -168,7 +205,7 @@ export default {
 			return this.$route.params.idUser;
 		},
 		username() {
-		return this.$route.query.username;
+			return this.$route.query.username;
 		},
   	},
 }
@@ -182,6 +219,11 @@ export default {
 			<h5>Photos {{ this.profile.photoCount }}</h5>
             <h5>Follower {{ this.profile.followersCount }}</h5>
             <h5>Following {{ this.profile.followingCount }}</h5>
+			<form @submit.prevent="changeUsername" v-if="this.token == this.profile.idUser">
+				<input class="form-control" type="text" id="testo" v-model="inputChangeUsername" required placeholder="Insert a new username">
+				<center><button class="btn btn-success" type="submit">Change username</button></center>
+			</form>
+			<button class="btn btn-warning" v-if="this.token != this.profile.idUser" @click="banUser">Ban user</button>
 			<Toolbar />
 		</div>
 		<div class="row" v-if="this.profile.images != null">
