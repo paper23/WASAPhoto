@@ -68,24 +68,35 @@ components:
             description: the image file
             type: string
             format: binary
-            #readOnly: true
+          likesCount:
+            description: the number of likes
+            type: integer
+            example: 10
+          commentsCount:
+            description: the number of comments
+            type: integer
+            example: 5
+          comments:
+            description: the comments
+            type: array
+            items: { $ref: "#/components/schemas/Comment" }
             
       Like:
         title: Like
         description: This object represents a single like
         type: object
         properties:
-          idLike:
-            description: the identifier of the like
+          idImage:
+            description: the identifier of the image
             type: integer
             example: 1
             readOnly: true
-          idLiker:
-            description: the identifier of the user who liked the photo
+          idOwner:
+            description: the identifier of the owner of the photo
             type: integer
             example: 1
-          idImageLiked:
-            description: the identifier of the photo that was liked
+          idLiker:
+            description: the identifier of the user who liked the photo
             type: integer
             example: 1
       
@@ -99,15 +110,19 @@ components:
             type: integer
             example: 1
             readOnly: true
-          idUserWriter:
-            description: the identifier of the user who commented on the photo
-            type: integer
-            example: 1
           idImageCommented:
             description: the identifier of the photo that was commented on
             type: integer
             example: 1
             readOnly: true
+          idOwner:
+            description: the identifier of the owner of the photo
+            type: integer
+            example: 1
+          idUserWriter:
+            description: the identifier of the user who commented on the photo
+            type: integer
+            example: 1
           text:
             description: the text of the comment
             type: string
@@ -115,6 +130,29 @@ components:
             minLength: 1
             maxLength: 200
             example: beautiful picture!
+
+      UserProfile:
+        title: UserProfile
+        description: this object represents a profile of an user
+        type: object
+        properties:
+          User:
+            $ref: "#/components/schemas/User"
+          followCount:
+            description: the number of the users followed
+            type: integer
+            example: 1
+          followerCount:
+            description: the number of the followers
+            type: integer
+            example: 1
+          Image:
+            $ref: "#/components/schemas/Image"
+          followStatus:
+            description: true if who is using Wasaphoto follows this user, else -> false
+            type: boolean
+            example: true
+
 
 tags:
 - name: login
@@ -326,7 +364,14 @@ paths:
         required: true
         content:
           application/json:
-            schema: { $ref: "#/components/schemas/Comment" }
+            schema:
+              description: the text of the comment
+              type: object
+              properties:
+                text:
+                  description: the text of the comment
+                  type: string
+                  example: beautiful!
       responses:
         "200":
           description: comment successfully uploaded
@@ -337,42 +382,15 @@ paths:
           description: user (owner and/or writer) and/or photo not found, comment not uploaded
           content:
             application/json:
-              schema:
-                description: returns the idUser, the idImage and an error string
-                type: object
-                properties:
-                  idUser:
-                    description: the identifier of the user
-                    type: integer
-                    example: 1
-                  idImage:
-                    description: the identiefier of the photo
-                    type: integer
-                    example: 1
-                  error:
-                    description: error type
-                    type: string
-                    example: user id and/or photo id not found, comment not uploaded
+              schema: { $ref: "#/components/schemas/Comment" }
         "403":
           description: you have been banned/you have banned from the/the image owner, comment not uploaded
           content:
             application/json:
-              schema:
-                description: returns the idUser, the idImage and an error string
-                type: object
-                properties:
-                  idUser:
-                    description: the identifier of the user
-                    type: integer
-                    example: 1
-                  idImage:
-                    description: the identiefier of the photo
-                    type: integer
-                    example: 1
-                  text:
-                    description: the text of the comment
-                    type: string
-                    example: beautiful picture!                  
+              schema: { $ref: "#/components/schemas/Comment" }
+        "401":
+          description: you must be logged in, not banned
+                   
 
   /users/{idUser}/images/{idImage}/comments/{idComment}:
     #uncommentPhoto
@@ -413,18 +431,9 @@ paths:
           description: comment/image/user not found, comment not deleted
           content:
             application/json:
-              schema:
-                description: returns the idComment and an error string
-                type: object
-                properties:
-                  idComment:
-                    description: the identifier of the comment
-                    type: integer
-                    example: 1
-                  error:
-                    description: error type
-                    type: string
-                    example: comment id not found, comment not deleted
+              schema: { $ref: "#/components/schemas/Comment" }
+        "401":
+          description: unauthorized, you must be logged in
   
   /users/{idUser}/bans/:
     #banUser
@@ -605,13 +614,14 @@ paths:
       operationId: likePhoto
       summary: liking an existing photo
       description: |
-        liking an existing photo using data provided in the body of request and the photo id and the owner of the photo id, return the full image object
+        liking an existing photo given its id and its owner id
       parameters:
       - name: idUser
         in: path
         description: the identifier of the owner of the photo
         schema:
           type: integer
+          example: 1
         required: true
       - name: idImage
         in: path
@@ -619,18 +629,6 @@ paths:
         schema:
           type: integer
         required: true
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              description: requests the idImageLiked
-              type: object
-              properties:
-                idImageLiked:
-                  description: id of the image liked
-                  type: integer
-                  example: 1
       responses:
         "200":
           description: photo succesfully liked
@@ -641,39 +639,13 @@ paths:
           description: user and/or photo not found, photo not liked
           content:
             application/json:
-              schema:
-                description: returns the idUser and the idImage
-                type: object
-                properties:
-                  idUser:
-                    description: the identifier of the user
-                    type: integer
-                    example: 1
-                  idImage:
-                    description: the identifier of the image
-                    type: integer
-                    example: 1
+              schema: { $ref: '#/components/schemas/Like' }
         "403":
           description: |
             you can't like a photo of a user who has banned you/you can't like a photo of a user you have banned/you can't like a photo you have already liked, not liked
           content:
             application/json:
-              schema:
-                description: returns the idImage, the idLiker and the idOwner
-                type: object
-                properties:
-                  idImage:
-                    description: id of the image
-                    type: integer
-                    example: 1
-                  idLiker:
-                    description: id of the user (liker)
-                    type: integer
-                    example: 1
-                  idOwner:
-                    description: id of the owner of the photo
-                    type: integer
-                    example: 2
+              schema: { $ref: '#/components/schemas/Like' }
         "401":
           description: you must be logged in, not liked
   
@@ -693,18 +665,21 @@ paths:
         description: the identifier of the owner of the photo
         schema:
           type: integer
+          example: 1
         required: true
       - name: idImage
         in: path
         description: the identifier of the photo
         schema:
           type: integer
+          example: 1
         required: true
       - name: idLiker
         in: path
-        description: the identifier of the like
+        description: the identifier of the user who wants to unlike
         schema:
           type: integer
+          example: 1
         required: true
       responses:
         "200":
@@ -713,33 +688,19 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/Like" }
         "401":
-          description: unauthorized, only the owner can delete a like, like not deleted
-          content:
-            application/json:
-              schema:
-                description: returns an error string
-                type: object
-                properties:
-                  error:
-                    description: error type
-                    type: string
-                    example: you are not the owner of the like or you are not logged in, like not deleted
+          description: unauthorized, authentication is required, like not deleted
         "404":
           description: like not found, like not deleted
           content:
             application/json:
-              schema:
-                description: returns the idLike and an error string
-                type: object
-                properties:
-                  idLike:
-                    description: the identifier of the like to delete
-                    type: integer
-                    example: 1
-                  error:
-                    description: error type
-                    type: string
-                    example: like id not found, like not deleted
+              schema: { $ref: "#/components/schemas/Like" }
+        "403":
+          description: |
+            you cannot unlike a photo for another user/you have been banned from/you have banned this user/
+            you can't unlike a photo you haven't liked yet, not unliked
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Like" }
   
   /users/{idUser}:
     #getUserProfile

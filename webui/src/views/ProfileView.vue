@@ -94,13 +94,6 @@ export default {
 						headers: {
 							Authorization: "Bearer " + localStorage.getItem("token")
 						}})
-				
-				for (let i = 0; i < this.profile.images.length; i++) {
-					if (this.profile.images[i].idImage = idImage) {
-						this.profile.images[i].likeStatus = !this.profile.images[i].likeStatus
-						break;
-					}
-				}
 			}
 			catch(e) {
 				this.errormsg = e.toString();
@@ -113,22 +106,11 @@ export default {
 						headers: {
 							Authorization: "Bearer " + localStorage.getItem("token")
 						}})
-				
-				for (let i = 0; i < this.profile.images.length; i++) {
-					if (this.profile.images[i].idImage = idImage) {
-						this.profile.images[i].likeStatus = !this.profile.images[i].likeStatus
-						break;
-					}
-				}
 			}
 			catch(e) {
 				this.errormsg = e.toString();
 			}
 		},
-
-		closeModal() {
-      		this.showModal = false;
-    	},
 
 		async submitComment(text, idImage) {
 			try {
@@ -230,6 +212,20 @@ export default {
 				this.errormsg = e.toString();
 			}
 		},
+
+		formattedDate(dataIn) {
+			let date = new Date(dataIn);
+			let options = { 
+				year: 'numeric', 
+				month: 'long', 
+				day: 'numeric', 
+				hour: 'numeric', 
+				minute: 'numeric', 
+				second: 'numeric', 
+				hour12: true,
+			};
+			return date.toLocaleString('en-US', options);
+    	},
 		
 	},
 	mounted() {
@@ -239,14 +235,6 @@ export default {
 		Navbar,
 		Toolbar,
 	},
-	computed: {
-		idUser() {
-			return this.$route.params.idUser;
-		},
-		username() {
-			return this.$route.query.username;
-		},
-  	},
 }
 </script>
 
@@ -276,6 +264,9 @@ export default {
 					<svg v-if="image.idOwner == this.token" class="feather clickable-red position-absolute top-0 end-0 m-0 remove-icon" title="Delete this photo" @click="deletePhoto(image.idImage)">
 						<use href="/feather-sprite-v4.29.0.svg#x" />
 					</svg>
+				</div>
+				<div class="d-flex justify-content-between align-items-center mb-2">
+					<p class="card-text mb-0">Posted on: {{ formattedDate(image.dateTime) }}</p>
 				</div>
 				<div class="d-flex justify-content-between align-items-center mb-2">
                         <p class="card-text mb-0">Likes : {{ image.likesCount }}</p>
@@ -312,7 +303,7 @@ export default {
 					<div class="modal-content">
 						<textarea v-model="commentText" placeholder="Enter your comment"></textarea>
 						<button class="btn btn-primary btn-sm" @click="submitComment(commentText, tmpIdImageModal)">Submit</button>
-						<button class="btn btn-secondary btn-sm" @click="closeModal">Close</button>
+						<button class="btn btn-secondary btn-sm" @click="this.showModal = false">Close</button>
 					</div>
 				</div>
 			</div>

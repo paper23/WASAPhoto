@@ -1,6 +1,8 @@
 package database
 
-import "database/sql"
+import (
+	"database/sql"
+)
 
 // return a list of images as requested from GetMyStream endpoint
 func (db *appdbimpl) GetStream(idUser int) (error, []int, []int, []string) {
@@ -44,5 +46,44 @@ func (db *appdbimpl) GetStream(idUser int) (error, []int, []int, []string) {
 	}
 
 	return err, imagesIdList, usersIdList, usernamesList
+
+}
+
+// return a list of images as requested from GetMyStream endpoint
+func (db *appdbimpl) GetStream2(idUser int) (error, []Stream2) {
+
+	var userStream []Stream2
+
+	query := `SELECT users.username, images.*
+	FROM images
+	JOIN users ON images.idOwner = users.idUser
+	JOIN follows ON users.idUser = follows.idFollowed
+	WHERE follows.idFollower = ?
+	ORDER BY images.dateTime DESC
+	LIMIT 100;`
+
+	rows, err := db.c.Query(query, idUser)
+	if err != nil {
+		return err, nil
+	}
+
+	for rows.Next() {
+
+		var tmp Stream2
+
+		err := rows.Scan(&tmp.Username, &tmp.Image.IdImage, &tmp.Image.IdOwner, &tmp.Image.DateTime, &tmp.Image.File)
+		if err != nil {
+			return err, nil
+		}
+
+		userStream = append(userStream, tmp)
+	}
+
+	err = rows.Err()
+	if err != nil {
+		return err, nil
+	}
+
+	return nil, userStream
 
 }

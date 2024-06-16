@@ -85,6 +85,7 @@ type AppDatabase interface {
 
 	// stream
 	GetStream(idUser int) (error, []int, []int, []string)
+	GetStream2(idUser int) (error, []Stream2)
 
 	Ping() error
 }

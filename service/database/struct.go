@@ -54,3 +54,8 @@ type Stream struct {
 	Username []string `json:"username"`
 	IdImage  []int    `json:"idImage"`
 }
+
+type Stream2 struct {
+	Image    Image  `json:"image"`
+	Username string `json:"username"`
+}

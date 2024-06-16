@@ -123,7 +123,7 @@ func (rt *_router) getUserProfile(w http.ResponseWriter, r *http.Request, ps htt
 			return
 		}
 
-		err, profile.Image[index].LikeStatus = rt.db.CheckLikeStatus(profile.User.IdUser, value.IdImage)
+		err, profile.Image[index].LikeStatus = rt.db.CheckLikeStatus(token, value.IdImage)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			return
