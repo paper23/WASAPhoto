@@ -8,10 +8,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-/*
-liking an existing photo using data provided in the body of request and the photo id and the owner of the photo id,
-return the full image object
-*/
+// searching an existing user using data provided in the path of request,
 func (rt *_router) searchUser(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 	var user User

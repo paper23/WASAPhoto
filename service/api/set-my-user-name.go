@@ -97,12 +97,6 @@ func (rt *_router) setMyUserName(w http.ResponseWriter, r *http.Request, ps http
 		return
 	}
 
-	err, user.Biography = rt.db.FindUserBio(user.IdUser)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
 	// 200 - username succesfully changed
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)

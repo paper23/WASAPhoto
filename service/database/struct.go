@@ -1,9 +1,8 @@
 package database
 
 type User struct {
-	IdUser    int    `json:"idUser"`
-	Username  string `json:"username"`
-	Biography string `json:"biography"`
+	IdUser   int    `json:"idUser"`
+	Username string `json:"username"`
 }
 
 type Image struct {
@@ -47,12 +46,6 @@ type UserProfile struct {
 	FollowerCount int     `json:"followerCount"`
 	Image         []Image `json:"images"`
 	FollowStatus  bool    `json:"followStatus"`
-}
-
-type Stream struct {
-	IdUser   []int    `json:"idUser"`
-	Username []string `json:"username"`
-	IdImage  []int    `json:"idImage"`
 }
 
 type Stream2 struct {

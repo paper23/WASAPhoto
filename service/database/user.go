@@ -1,8 +1,8 @@
 package database
 
-// insert a new user given its username (set biography = "")
+// insert a new user given its username
 func (db *appdbimpl) DoLogin(username string) error {
-	_, err := db.c.Exec(`INSERT INTO users (username, biography) VALUES (?, "")`, username)
+	_, err := db.c.Exec(`INSERT INTO users (username) VALUES (?)`, username)
 
 	if err != nil {
 		return err
@@ -48,20 +48,19 @@ func (db *appdbimpl) SetUsername(id int, username string) error {
 }
 
 // returns all the informations about a user given its id
-func (db *appdbimpl) SelectUser(id int) (error, int, string, string) {
+func (db *appdbimpl) SelectUser(id int) (error, int, string) {
 	var err error
 
 	var idUser int
 	var username string
-	var bio string
 
-	err = db.c.QueryRow(`SELECT * FROM users WHERE idUser = ?`, id).Scan(&idUser, &username, &bio)
+	err = db.c.QueryRow(`SELECT * FROM users WHERE idUser = ?`, id).Scan(&idUser, &username)
 
 	if err != nil {
-		return err, idUser, username, bio
+		return err, idUser, username
 	}
 
-	return err, idUser, username, bio
+	return err, idUser, username
 }
 
 func (db *appdbimpl) FindUserById(id int) (error, int) {
@@ -131,17 +130,6 @@ func (db *appdbimpl) BanUser(idUser int, idUserToBan int) error {
 	_, err = db.c.Exec(`INSERT INTO bans (idUser, idBanned) VALUES (?, ?)`, idUser, idUserToBan)
 
 	return err
-}
-
-func (db *appdbimpl) FindUserBio(idUser int) (error, string) {
-	var bio string
-	err := db.c.QueryRow(`SELECT biography FROM users WHERE idUser = ?`, idUser).Scan(&bio)
-
-	if err != nil {
-		return err, ""
-	}
-
-	return err, bio
 }
 
 func (db *appdbimpl) FindUsername(id int) (error, string) {

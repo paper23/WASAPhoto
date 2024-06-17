@@ -43,7 +43,7 @@ type AppDatabase interface {
 	FindUserId(username string) (error, int)
 	CheckUsername(username string) (error, int)
 	SetUsername(id int, username string) error
-	SelectUser(id int) (error, int, string, string)
+	SelectUser(id int) (error, int, string)
 	FindUserById(id int) (error, int)
 	FollowUser(idUser int, idUserToFollow int) error
 	BanUser(idUser int, idUserToBan int) error
@@ -51,7 +51,6 @@ type AppDatabase interface {
 	SbanUser(idUser int, idUserToSban int) error
 	CheckFollowing(idUser int, idUserToCheck int) (error, int)
 	UnfollowUser(idUser int, idUserToUnfolow int) error
-	FindUserBio(idUser int) (error, string)
 	FindUsername(idUser int) (error, string)
 	CountFollowing(idUser int) (error, int)
 	CountFollowers(idUser int) (error, int)
@@ -129,8 +128,7 @@ func createDatabase(db *sql.DB) error {
 	tables := [6]string{
 		`CREATE TABLE IF NOT EXISTS users (
 			idUser INTEGER PRIMARY KEY AUTOINCREMENT,
-			username VARCHAR(16) NOT NULL UNIQUE,
-			biography VARCHAR(100)
+			username VARCHAR(16) NOT NULL UNIQUE
 		);`,
 		`CREATE TABLE IF NOT EXISTS images (
 			idImage INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,

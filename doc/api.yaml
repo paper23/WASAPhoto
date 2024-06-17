@@ -32,13 +32,6 @@ components:
             maxLength: 16
             pattern: 'ˆ.+?$'
             example: 'lorenzo23'
-          biography:
-            description: small text describing the user
-            type: string
-            minLength: 1
-            maxLength: 100
-            pattern: "ˆ.*$"
-            example: "Hi, I'm 21, I live in Rome"
           
       Image:
         title: Image
@@ -153,6 +146,18 @@ components:
             type: boolean
             example: true
 
+      Stream:
+        title: Stream
+        description: this object represents an user's stream
+        type: object
+        properties:
+          Image:
+            $ref: "#/components/schemas/Image"
+          Username:
+            description: the username of the owner of the image
+            type: string
+            example: lorenzo
+
 
 tags:
 - name: login
@@ -240,17 +245,13 @@ paths:
           content:
             application/json:
               schema:
-                description: returns userId and an error string
+                description: returns userId
                 type: object
                 properties:
                   idOwner:
                     description: the identifier of the owner of the photo
                     type: integer
                     example: 1
-                  error:
-                    description: error type
-                    type: string
-                    example: user id not found, photo not uploaded
         "403":
           description: you cannot upload a photo for another user, photo not uploaded
           content:
@@ -711,7 +712,9 @@ paths:
       operationId: getUserProfile
       summary: return the user profile
       description: |
-        return the user profile given its id, the user profile is composed by the user’s photos (in reverse chronological order), how many photos have been uploaded, and the user’s followers and following
+        return the user profile given its id, the user profile is composed by the user’s photos (in reverse chronological order),
+        how many photos have been uploaded,
+        and the user’s followers and following
       parameters:
         - name: idUser
           in: path
@@ -725,32 +728,9 @@ paths:
           description: user profile
           content:
             application/json:
-              schema:
-                allOf:
-                - $ref: "#/components/schemas/User"
-                - type: object
-                  properties:
-                    followCount:
-                      description: the counter of the user you are following
-                      type: integer
-                      example: 250
-                    followerCount:
-                      description: the counter of the users who follow you
-                      type: integer
-                      example: 185
-                - $ref: "#/components/schemas/Image"
+              schema: { $ref: "#/components/schemas/UserProfile" }
         "401":
-          description: authentication is required
-          content:
-            application/json:
-              schema:
-                description: returns an error string
-                type: object
-                properties:
-                  error:
-                    description: error type
-                    type: string
-                    example: authentication is required, please log in into your account
+          description: you must be logged in
         "403":
           description: you cannot see the profile of a user who has banned you/you banned
           content:
@@ -768,17 +748,13 @@ paths:
           content:
             application/json:
               schema:
-                description: returns the idUser and an error string
+                description: returns the idUser
                 type: object
                 properties:
                   idUser:
                     description: the identifier of the user
                     type: integer
                     example: 1
-                  error:
-                    description: error type
-                    type: string
-                    example: id user not found
     
     #setMyUserName
     put:
@@ -821,17 +797,13 @@ paths:
           content:
             application/json:
               schema:
-                description: returns the idUser and an error string
+                description: returns the idUser
                 type: object
                 properties:
                   idUser:
                     description: the identifier of the user
                     type: integer
                     example: 1
-                  error:
-                    description: error type
-                    type: string
-                    example: user identifier not found, username not uploaded
         "409":
           description: username already used, username not changed
           content:
@@ -977,7 +949,7 @@ paths:
           example: 1
       responses:
         "200":
-          description: my stream (feed)
+          description: my stream
           content:
             application/json:
               schema:
@@ -985,49 +957,25 @@ paths:
                 minItems: 0
                 maxItems: 100
                 items:
-                  $ref: "#/components/schemas/Image"
+                  $ref: "#/components/schemas/Stream"
         "401":
           description: you must be logged in
-          content:
-            application/json:
-              schema:
-                description: returns an error string
-                type: object
-                properties:
-                  error:
-                    description: error type
-                    type: string
-                    example: you must be logged in to see you stream
         "403":
           description: you cant' see another user's stream
-          content:
-            application/json:
-              schema:
-                description: returns an error string
-                type: object
-                properties:
-                  error:
-                    description: error type
-                    type: string
-                    example: you can't see antoher user's stream, forbidden
         "404":
           description: user not found
           content:
             application/json:
               schema:
-                description: returns the idUser and an error string
+                description: returns the idUser
                 type: object
                 properties:
                   idUser:
                     description: the identifier of the user
                     type: integer
                     example: 1
-                  error:
-                    description: error type
-                    type: string
-                    example: user/user id not found
 
-  /users/{username}/bans/:
+  /users/{username}/:
     #searchUser
     get:
       security:
@@ -1055,17 +1003,13 @@ paths:
           content:
             application/json:
               schema:
-                description: returns an error string and the username searched
+                description: returns the username searched
                 type: object
                 properties:
                   username:
-                    description: the username searched
+                    description: username searched
                     type: string
                     example: lorenzo
-                  error:
-                    description: error type
-                    type: string
-                    example: user not found
         "401":
           description: you must be logged in
         "403":
@@ -1080,7 +1024,3 @@ paths:
                     description: the username searched
                     type: string
                     example: lorenzo
-                  error:
-                    description: error type
-                    type: string
-                    example: you have been banned from the user and/or you have banned the user/you or you can't search yoursefl

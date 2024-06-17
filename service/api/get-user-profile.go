@@ -149,12 +149,6 @@ func (rt *_router) getUserProfile(w http.ResponseWriter, r *http.Request, ps htt
 		profile.FollowStatus = false
 	}
 
-	err, profile.User.Biography = rt.db.FindUserBio(profile.User.IdUser)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
 	err, profile.User.Username = rt.db.FindUsername(profile.User.IdUser)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)

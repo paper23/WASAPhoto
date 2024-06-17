@@ -87,7 +87,7 @@ func (rt *_router) banUser(w http.ResponseWriter, r *http.Request, ps httprouter
 		return
 	}
 
-	err, userToBan.IdUser, userToBan.Username, userToBan.Biography = rt.db.SelectUser(userToBan.IdUser)
+	err, userToBan.IdUser, userToBan.Username = rt.db.SelectUser(userToBan.IdUser)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return

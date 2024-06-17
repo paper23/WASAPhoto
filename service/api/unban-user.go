@@ -150,7 +150,7 @@ func (rt *_router) unbanUser(w http.ResponseWriter, r *http.Request, ps httprout
 		return
 	}
 
-	err, userToSban.IdUser, userToSban.Username, userToSban.Biography = rt.db.SelectUser(userToSban.IdUser)
+	err, userToSban.IdUser, userToSban.Username = rt.db.SelectUser(userToSban.IdUser)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
