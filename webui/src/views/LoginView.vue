@@ -25,10 +25,10 @@ export default {
                     this.$router.push({ path: '/session' });
                 } catch (e) {
                     if (e.response && e.response.status === 400) {
-                        this.errormsg = "Form error, please check all fields and try again. If you think that this is an error, write an e-mail to us.";
+                        this.errormsg = "Form error, please try again.";
                         this.detailedmsg = null;
                     } else if (e.response && e.response.status === 500) {
-                        this.errormsg = "An internal error occurred. We will be notified. Please try again later.";
+                        this.errormsg = "An internal error occurred. Please try again later.";
                         this.detailedmsg = e.toString();
                     } else {
                         this.errormsg = e.toString();

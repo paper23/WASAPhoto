@@ -155,7 +155,13 @@ export default {
 						})
 			}
 			catch(e) {
-				this.errormsg = e.toString();
+				if (e.response && e.response.status === 409) {
+					this.errormsg = "Username already used"
+					this.msg = e.toString();
+				}
+				else {
+					this.errormsg = e.toString();
+				}
 			}
 		},
 

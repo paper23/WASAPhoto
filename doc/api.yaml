@@ -392,7 +392,6 @@ paths:
         "401":
           description: you must be logged in, not banned
                    
-
   /users/{idUser}/images/{idImage}/comments/{idComment}:
     #uncommentPhoto
     delete:

@@ -55,7 +55,21 @@
 						})
 				}
 				catch (e) {
-					this.errormsg = e.toString();
+					if (e.response && e.response.status === 404) {
+						this.errormsg = "User '" + this.searchUsername + "' not found"
+						this.msg = e.toString();
+					}
+					else if (e.response && e.response.status === 403 && this.username == this.searchUsername) {
+						this.errormsg = "You can't search yourself"
+						this.msg = e.toString();
+					}
+					else if (e.response && e.response.status === 403 && this.username != this.searchUsername) {
+						this.errormsg = "You have been banned by '" + this.searchUsername + "' or '" + this.searchUsername + "' has banned you"
+						this.msg = e.toString();
+					}
+					else {
+						this.errormsg = e.toString();
+					}
 				}
 			},
 			
