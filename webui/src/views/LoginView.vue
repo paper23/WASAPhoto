@@ -26,13 +26,13 @@ export default {
                 } catch (e) {
                     if (e.response && e.response.status === 400) {
                         this.errormsg = "Form error, please try again.";
-                        this.detailedmsg = null;
+                        this.msg = null;
                     } else if (e.response && e.response.status === 500) {
                         this.errormsg = "An internal error occurred. Please try again later.";
-                        this.detailedmsg = e.toString();
+                        this.msg = e.toString();
                     } else {
                         this.errormsg = e.toString();
-                        this.detailedmsg = null;
+                        this.msg = null;
                     }
                 }
             }

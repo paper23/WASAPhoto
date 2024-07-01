@@ -124,9 +124,9 @@ func (rt *_router) unfollowUser(w http.ResponseWriter, r *http.Request, ps httpr
 		return
 	}
 
-	// 200 - user succesfully unfollowed
+	// 204 - user succesfully unfollowed
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
+	w.WriteHeader(http.StatusNoContent)
 	return
 
 }

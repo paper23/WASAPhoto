@@ -295,7 +295,7 @@ paths:
           type: integer
         required: true
       responses:
-        "200":
+        "204":
           description: photo succesfully deleted
         "401":
           description: you must be logged in, photo not deleted
@@ -564,7 +564,7 @@ paths:
           example: 1
         required: true
       responses:
-        "200":
+        "204":
           description: user succesfully unbanned
         "401":
           description: you must be logged in, not banned
@@ -853,7 +853,7 @@ paths:
           example: 1
         required: true
       responses:
-        "200":
+        "204":
           description: user successfully followed
         "404":
           description: user not found, not followed
@@ -899,7 +899,7 @@ paths:
           example: 1
         required: true
       responses:
-        "200":
+        "204":
           description: user succesfully unfollowed
         "403":
           description: |

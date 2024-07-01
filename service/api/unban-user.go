@@ -156,9 +156,9 @@ func (rt *_router) unbanUser(w http.ResponseWriter, r *http.Request, ps httprout
 		return
 	}
 
-	// 200 - user sbanned succesfully
+	// 204 - user sbanned succesfully
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
+	w.WriteHeader(http.StatusNoContent)
 	return
 
 }

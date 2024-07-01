@@ -109,8 +109,8 @@ func (rt *_router) deletePhoto(w http.ResponseWriter, r *http.Request, ps httpro
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	// 200 - photo succesfully deleted
+	// 204 - photo succesfully deleted
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
+	w.WriteHeader(http.StatusNoContent)
 
 }
