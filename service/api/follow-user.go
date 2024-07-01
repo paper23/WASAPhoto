@@ -111,6 +111,5 @@ func (rt *_router) followUser(w http.ResponseWriter, r *http.Request, ps httprou
 	// 204 - user succesfully followed
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusNoContent)
-	return
 
 }
