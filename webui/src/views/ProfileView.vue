@@ -113,17 +113,23 @@ export default {
 		},
 
 		async submitComment(text, idImage) {
-			try {
-            	let response = await this.$axios.post("/users/" + this.profile.idUser + "/images/" + idImage + "/comments/", {text}, {
-						headers: {
-							Authorization: "Bearer " + localStorage.getItem("token")
-						}})
-				this.showModal = false
-				window.location.reload()
+			if (text == "") {
+				this.errormsg = "Comment cannot be empty"
 			}
-			catch(e) {
-				this.errormsg = e.toString();
+			else {
+				try {
+					let response = await this.$axios.post("/users/" + this.profile.idUser + "/images/" + idImage + "/comments/", {text}, {
+							headers: {
+								Authorization: "Bearer " + localStorage.getItem("token")
+							}})
+					this.showModal = false
+					window.location.reload()
+				}
+				catch(e) {
+					this.errormsg = e.toString();
+				}
 			}
+			
 		},
 
 		async uncommentPhoto(idImage, idComment) {
