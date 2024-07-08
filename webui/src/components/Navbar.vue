@@ -42,7 +42,7 @@
             }
         },
 		methods: {
-			async SearchUser() {
+			async searchUser() {
 				try {
             		let response = await this.$axios.get("/search/" + this.searchUsername, {
 						headers: {
@@ -117,7 +117,7 @@
 						Search User
 					<div class="input-group mb-0">
 						<input type="text" id="searchUserUsername" v-model="searchUsername" class="form-control" placeholder="Username" required @keyup.enter="SearchUser">
-						<button class="btn btn-outline-dark" type="button" @click="SearchUser">
+						<button class="btn btn-outline-dark" type="button" @click="searchUser">
 						<svg class="feather">
 							<use href="/feather-sprite-v4.29.0.svg#search" />
 						</svg>

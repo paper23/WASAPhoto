@@ -73,7 +73,13 @@ export default {
 				this.profile.photoCount = this.profile.images.length
 			}
 			catch(e) {
-				this.errormsg = e.toString();
+				if (e.response && e.response.status === 403) {
+					this.errormsg = "You have been banned by this user";
+                    this.msg = null;
+				} else {
+                    this.errormsg = e.toString();
+                    this.msg = null;
+                }
 			}
         },
 		
@@ -112,7 +118,7 @@ export default {
 			}
 		},
 
-		async submitComment(text, idImage) {
+		async commentPhoto(text, idImage) {
 			if (text == "") {
 				this.errormsg = "Comment cannot be empty"
 			}
@@ -146,7 +152,7 @@ export default {
 			}
 		},
 
-		async changeUsername() {
+		async setMyUserName() {
 			try {
 				let response = await this.$axios.put("/users/" + this.profile.idUser, { username: this.inputChangeUsername }, {
 					headers: {
@@ -258,7 +264,7 @@ export default {
 			<h5>Photos {{ this.profile.photoCount }}</h5>
             <h5>Follower {{ this.profile.followersCount }}</h5>
             <h5>Following {{ this.profile.followingCount }}</h5>
-			<form @submit.prevent="changeUsername" v-if="this.token == this.profile.idUser">
+			<form @submit.prevent="setMyUserName" v-if="this.token == this.profile.idUser">
 				<input class="form-control" type="text" id="testo" v-model="inputChangeUsername" required placeholder="Insert a new username">
 				<center><button class="btn btn-success" type="submit">Change username</button></center>
 			</form>
@@ -269,7 +275,7 @@ export default {
 			<button class="btn btn-warning" v-if="this.token != this.profile.idUser" @click="banUser">Ban user</button>
 			<Toolbar />
 		</div>
-		<div class="row" v-if="this.profile.images != null">
+		<div class="row" v-if="this.profile.images != null && !this.errormsg">
 			<div class="col-md-4" v-for="image in this.profile.images" :key="image.idImage">
 				<div class="card mb-4 shadow-sm fixed-size">
                 	<img class="card-img-top" :src=image.file alt="Card image cap">
@@ -314,21 +320,23 @@ export default {
 				<div v-if="showModal" class="modal-overlay">
 					<div class="modal-content">
 						<textarea v-model="commentText" placeholder="Enter your comment"></textarea>
-						<button class="btn btn-primary btn-sm" @click="submitComment(commentText, tmpIdImageModal)">Submit</button>
+						<button class="btn btn-primary btn-sm" @click="commentPhoto(commentText, tmpIdImageModal)">Submit</button>
 						<button class="btn btn-secondary btn-sm" @click="this.showModal = false">Close</button>
 					</div>
 				</div>
 			</div>
 		</div>
-		<div v-else class="centered">
+		<div v-else-if="!this.errormsg" class="centered">
 			<svg class="feather">
 				<use href="/feather-sprite-v4.29.0.svg#image" />
 			</svg>
-			<h4>Non hai caricato nessuna immagine</h4>
+			<h4>No images have been uploaded yet</h4>
+		</div>
+		<div v-else>
+			<ErrorMsg v-if="errormsg" :msg="errormsg"></ErrorMsg>
 		</div>
 	</div>
-
-	<ErrorMsg v-if="errormsg" :msg="errormsg"></ErrorMsg>
+	
 </template>
 
 <style>

@@ -117,7 +117,7 @@ export default {
 			}
 		},
 
-		async submitComment(text, idImage, idOwnerImage) {
+		async commentPhoto(text, idImage, idOwnerImage) {
 			if (text == "") {
 				this.errormsg = "Comment cannot be empty"
 			}
@@ -212,7 +212,7 @@ export default {
 				<div v-if="showModal" class="modal-overlay">
 					<div class="modal-content">
 						<textarea v-model="commentText" placeholder="Enter your comment"></textarea>
-						<button class="btn btn-primary btn-sm" @click="submitComment(commentText, tmpIdImageModal, tmpIdUserModal)">Submit</button>
+						<button class="btn btn-primary btn-sm" @click="commentPhoto(commentText, tmpIdImageModal, tmpIdUserModal)">Submit</button>
 						<button class="btn btn-secondary btn-sm" @click="this.showModal = false">Close</button>
 					</div>
 				</div>
