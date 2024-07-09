@@ -72,6 +72,11 @@ func (rt *_router) getBannedList(w http.ResponseWriter, r *http.Request, ps http
 		return
 	}
 
+	if bannedList == nil {
+		bannedList = []database.User{}
+		bannedList = append(bannedList, database.User{IdUser: 0, Username: ""})
+	}
+
 	// 200 - get banned list
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)

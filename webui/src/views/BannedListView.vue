@@ -63,7 +63,7 @@ export default {
             <h3>List of users you have banned</h3>
             <Toolbar />
         </div>
-        <div class="row justify-content-center align-items-center" v-if="this.bannedUsers[0].idUser != 0">
+        <div class="row justify-content-center align-items-center" v-if="bannedUsers[0].idUser != 0">
             <div class="text-center">
                 <ul>
                     <li v-for="banned in this.bannedUsers" :key="banned.idUser">
