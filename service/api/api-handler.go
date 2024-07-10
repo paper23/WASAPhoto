@@ -9,31 +9,31 @@ func (rt *_router) Handler() http.Handler {
 	// Register routes
 
 	// login
-	rt.router.POST("/session", rt.doLogin) // FATTO
+	rt.router.POST("/session", rt.doLogin)
 
 	// user
-	rt.router.PUT("/users/:idUser", rt.setMyUserName)                   // FATTO
-	rt.router.POST("/users/:idUser/follows/", rt.followUser)            // FATTO
-	rt.router.DELETE("/users/:idUser/follows/", rt.unfollowUser)        // FATTO
-	rt.router.POST("/users/:idUser/bans/", rt.banUser)                  // FATTO
-	rt.router.DELETE("/users/:idUser/bans/:idUserBanned", rt.unbanUser) // FATTO
-	rt.router.GET("/users/:idUser/bans/", rt.getBannedList)             // FATTO
-	rt.router.GET("/users/:idUser", rt.getUserProfile)                  // FATTO
-	rt.router.GET("/search/:username", rt.searchUser)                   // FATTO
+	rt.router.PUT("/users/:idUser", rt.setMyUserName)
+	rt.router.POST("/users/:idUser/follows/", rt.followUser)
+	rt.router.DELETE("/users/:idUser/follows/", rt.unfollowUser)
+	rt.router.POST("/users/:idUser/bans/", rt.banUser)
+	rt.router.DELETE("/users/:idUser/bans/:idUserBanned", rt.unbanUser)
+	rt.router.GET("/users/:idUser/bans/", rt.getBannedList)
+	rt.router.GET("/users/:idUser", rt.getUserProfile)
+	rt.router.GET("/search/:username", rt.searchUser)
 
 	// image
-	rt.router.POST("/users/:idUser/images/", rt.uploadPhoto)                                  // FATTO
-	rt.router.DELETE("/users/:idUser/images/:idImage", rt.deletePhoto)                        // FATTO
-	rt.router.POST("/users/:idUser/images/:idImage/comments/", rt.commentPhoto)               // FATTO
-	rt.router.DELETE("/users/:idUser/images/:idImage/comments/:idComment", rt.uncommentPhoto) // FATTO
-	rt.router.POST("/users/:idUser/images/:idImage/likes/", rt.likePhoto)                     // FATTO
-	rt.router.DELETE("/users/:idUser/images/:idImage/likes/:idLiker", rt.unlikePhoto)         // FATTO
+	rt.router.POST("/users/:idUser/images/", rt.uploadPhoto)
+	rt.router.DELETE("/users/:idUser/images/:idImage", rt.deletePhoto)
+	rt.router.POST("/users/:idUser/images/:idImage/comments/", rt.commentPhoto)
+	rt.router.DELETE("/users/:idUser/images/:idImage/comments/:idComment", rt.uncommentPhoto)
+	rt.router.POST("/users/:idUser/images/:idImage/likes/", rt.likePhoto)
+	rt.router.DELETE("/users/:idUser/images/:idImage/likes/:idLiker", rt.unlikePhoto)
 
 	// stream
-	rt.router.GET("/users/:idUser/stream", rt.getMyStream) // USATO, DA CONTROLLARE CON API
+	rt.router.GET("/users/:idUser/stream", rt.getMyStream)
 
 	// Special routes
-	rt.router.GET("/liveness", rt.liveness) // OK
+	rt.router.GET("/liveness", rt.liveness)
 
 	return rt.router
 }

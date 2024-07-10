@@ -974,7 +974,7 @@ paths:
                     type: integer
                     example: 1
 
-  /search/{username}/:
+  /search/{username}:
     #searchUser
     get:
       security:
